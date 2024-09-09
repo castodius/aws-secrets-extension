@@ -1,0 +1,30 @@
+{
+  "name": "aws-secrets-extension",
+  "version": "0.0.1",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "type": "module",
+  "engines": {
+    "node": ">=20.x"
+  },
+  "packageManager": "yarn@4.4.1",
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "20.14.9",
+    "aws-cdk-lib": "2.156.0",
+    "constructs": "^10.0.0",
+    "typescript": "~5.5.3"
+  },
+  "peerDependencies": {
+    "aws-cdk-lib": "2.156.0",
+    "constructs": "^10.0.0"
+  },
+  "files": [
+    "dist/*",
+    "package.json",
+    "README.MD"
+  ]
+}
