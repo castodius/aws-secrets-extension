@@ -1,21 +1,42 @@
-// import * as cdk from 'aws-cdk-lib';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import { Construct } from 'constructs';
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
+import { buildSync } from 'esbuild';
+import { Code, LayerVersion } from 'aws-cdk-lib/aws-lambda';
 
-export interface AwsSecretsExtensionProps {
-  // Define construct properties here
-}
+    
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
-export class AwsSecretsExtension extends Construct {
+export interface AwsSecretsExtensionProps { }
+
+export class AwsSecretsExtension extends LayerVersion {
 
   constructor(scope: Construct, id: string, props: AwsSecretsExtensionProps = {}) {
-    super(scope, id);
+    const result = buildSync({
+      bundle: true,
+      treeShaking: true,
+      minify: true,
+      target: 'node20',
+      format: 'esm',
+      legalComments: 'none',
+      metafile: true,
+      entryPoints: [
+        join(__dirname, './extension/index.js')
+      ],
+      outdir: '.dist/extensions',
+      platform: 'node',
+      banner: {
+        'js': '#!/usr/bin/env node\nimport { createRequire } from "module"; const require = createRequire(import.meta.url);'
+      },
+      external: [],
+      outExtension: {
+        '.js': '.mjs'
+      }
+    })
 
-    // Define construct contents here
-
-    // example resource
-    // const queue = new sqs.Queue(this, 'AwsSecretsExtensionQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
+    super(scope, id, {
+      code: Code.fromAsset('.dist')
+    });
   }
 }
