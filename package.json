@@ -2,8 +2,8 @@
   "name": "aws-secrets-extension",
   "version": "0.0.1",
   "license": "MIT",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "type": "module",
   "engines": {
     "node": ">=20.x"
@@ -13,6 +13,8 @@
     "build": "tsc"
   },
   "devDependencies": {
+    "@types/koa": "^2",
+    "@types/koa__router": "^12.0.4",
     "@types/node": "20.14.9",
     "aws-cdk-lib": "2.156.0",
     "constructs": "^10.0.0",
@@ -26,5 +28,11 @@
     "dist/*",
     "package.json",
     "README.MD"
-  ]
+  ],
+  "dependencies": {
+    "@aws-sdk/client-ssm": "^3.645.0",
+    "@koa/router": "^13.0.0",
+    "esbuild": "^0.23.1",
+    "koa": "^2.15.3"
+  }
 }
