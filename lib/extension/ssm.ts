@@ -1,6 +1,6 @@
 import Koa from 'koa'
 import Router from '@koa/router'
-import { GetParameterCommand, SSMClient, } from '@aws-sdk/client-ssm'
+import { GetParameterCommand, GetParametersCommand, SSMClient, } from '@aws-sdk/client-ssm'
 
 type KoaContext = Koa.ParameterizedContext<Koa.DefaultState, Koa.DefaultContext & Router.RouterParamContext<Koa.DefaultState, Koa.DefaultContext>, unknown>
 
@@ -18,13 +18,60 @@ export const getParameter = async (ctx: KoaContext, next: Koa.Next) => {
     await next()
     return
   }
-  
-  const { Parameter } = await client.send(new GetParameterCommand({
+
+  const result = await client.send(new GetParameterCommand({
     Name: name,
     WithDecryption: withDecryption === 'true'
   }))
 
-  cache[name] = JSON.stringify(Parameter)
+  cache[name] = JSON.stringify(result)
   ctx.body = cache[name]
+  await next()
+}
+
+export const getParameters = async (ctx: KoaContext, next: Koa.Next) => {
+  console.log('Get parameters')
+  if ('names' in ctx.query) {
+    await getParametersByNames(ctx, next)
+  } else if ('path' in ctx.query) {
+
+  } else {
+    throw new Error('Oh no')
+  }
+}
+
+const unpackNames = (names: string | string[] | undefined): string[] => {
+  if (!names) {
+    return []
+  }
+  if (Array.isArray(names)) {
+    return names
+  }
+  return names.split(',')
+}
+
+const getParametersByNames = async (ctx: KoaContext, next: Koa.Next) => {
+  const { names, withDecryption = 'false' } = ctx.query
+  console.log(names)
+
+  const values = unpackNames(names)
+  values.sort()
+  console.log(values)
+
+  const key = values.join(',')
+  if(cache[key]){
+    console.log(`Found cached value for ${key}`)
+    ctx.body = cache[key]
+    await next()
+    return
+  }
+
+  const result = await client.send(new GetParametersCommand({
+    Names: values,
+    WithDecryption: withDecryption === 'true'
+  }))
+
+  cache[key] = JSON.stringify(result)
+  ctx.body = cache[key]
   await next()
 }

@@ -2,12 +2,13 @@ import Koa from 'koa'
 import Router from '@koa/router'
 
 import { next, register } from "./extensionsApi.js";
-import { getParameter } from './ssm.js';
+import { getParameter, getParameters } from './ssm.js';
 
 const app = new Koa()
 const router = new Router()
 
 router.get('/parameters/:parameterName', getParameter)
+router.get('/parameters', getParameters)
 app
   .use(router.routes())
   .use(router.allowedMethods())
