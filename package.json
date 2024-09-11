@@ -10,7 +10,12 @@
   },
   "packageManager": "yarn@4.4.1",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test": "vitest run",
+    "test-watch": "vitest"
+  },
+  "imports": {
+    "#lib/*": "./lib/*"
   },
   "devDependencies": {
     "@types/koa": "^2",
@@ -18,7 +23,8 @@
     "@types/node": "20.14.9",
     "aws-cdk-lib": "2.156.0",
     "constructs": "^10.0.0",
-    "typescript": "~5.5.3"
+    "typescript": "~5.5.3",
+    "vitest": "^2.0.5"
   },
   "peerDependencies": {
     "aws-cdk-lib": "2.156.0",
