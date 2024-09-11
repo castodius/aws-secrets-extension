@@ -1,3 +1,5 @@
+import { variables } from "./env.js"
+
 export type LogFormat = 'json' | 'text'
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error'
 type Message = string | object
@@ -12,6 +14,8 @@ export class Logger {
     this.#format = format
     this.#level = this.#levels.indexOf(level)
     this.#writerFunction = writerFunction
+
+    this.debug(`Logger instantiated with format ${format} and log level ${level}`)
   }
 
   private format(message: Message, level: LogLevel): string {
@@ -50,4 +54,4 @@ export class Logger {
   }
 }
 
-export const logger = new Logger('json', 'debug')
+export const logger = new Logger(variables.LOG_FORMAT, variables.LOG_LEVEL)
