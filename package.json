@@ -11,8 +11,8 @@
   "packageManager": "yarn@4.4.1",
   "scripts": {
     "build": "tsc",
-    "test": "vitest run",
-    "test-watch": "vitest"
+    "test": "vitest run --coverage",
+    "test-watch": "vitest --coverage"
   },
   "imports": {
     "#lib/*": "./lib/*"
@@ -21,6 +21,7 @@
     "@types/koa": "^2",
     "@types/koa__router": "^12.0.4",
     "@types/node": "20.14.9",
+    "@vitest/coverage-istanbul": "^2.0.5",
     "aws-cdk-lib": "2.156.0",
     "constructs": "^10.0.0",
     "typescript": "~5.5.3",
