@@ -1,6 +1,6 @@
 import Koa from 'koa'
 import Router from '@koa/router'
-import { GetParameterCommand, GetParametersCommand, SSMClient, } from '@aws-sdk/client-ssm'
+import { GetParameterCommand, GetParametersCommand, GetParametersCommandOutput, SSMClient, } from '@aws-sdk/client-ssm'
 
 type KoaContext = Koa.ParameterizedContext<Koa.DefaultState, Koa.DefaultContext & Router.RouterParamContext<Koa.DefaultState, Koa.DefaultContext>, unknown>
 
@@ -30,27 +30,6 @@ export const getParameter = async (ctx: KoaContext, next: Koa.Next) => {
 }
 
 export const getParameters = async (ctx: KoaContext, next: Koa.Next) => {
-  console.log('Get parameters')
-  if ('names' in ctx.query) {
-    await getParametersByNames(ctx, next)
-  } else if ('path' in ctx.query) {
-
-  } else {
-    throw new Error('Oh no')
-  }
-}
-
-const unpackNames = (names: string | string[] | undefined): string[] => {
-  if (!names) {
-    return []
-  }
-  if (Array.isArray(names)) {
-    return names
-  }
-  return names.split(',')
-}
-
-const getParametersByNames = async (ctx: KoaContext, next: Koa.Next) => {
   const { names, withDecryption = 'false' } = ctx.query
   console.log(names)
 
@@ -59,7 +38,7 @@ const getParametersByNames = async (ctx: KoaContext, next: Koa.Next) => {
   console.log(values)
 
   const key = values.join(',')
-  if(cache[key]){
+  if (cache[key]) {
     console.log(`Found cached value for ${key}`)
     ctx.body = cache[key]
     await next()
@@ -73,5 +52,28 @@ const getParametersByNames = async (ctx: KoaContext, next: Koa.Next) => {
 
   cache[key] = JSON.stringify(result)
   ctx.body = cache[key]
+  cacheIndividualValues(result)
+
   await next()
+}
+
+
+const unpackNames = (names: string | string[] | undefined): string[] => {
+  if (!names) {
+    return []
+  }
+  if (Array.isArray(names)) {
+    return names
+  }
+  return names.split(',')
+}
+
+const cacheIndividualValues = (result: GetParametersCommandOutput) => {
+  for (const parameter of result.Parameters!) {
+    const arn = parameter.ARN!
+    const name = arn.match(/.*:parameter\/(.*)/)![1]
+
+    cache[arn] = JSON.stringify(parameter)
+    cache[name] = JSON.stringify(parameter)
+  }
 }
