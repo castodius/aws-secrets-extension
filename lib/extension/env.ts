@@ -41,4 +41,3 @@ export const getVariableEnum = (suffix: string, allowedValues: string[], default
 
   return variable
 }
-
