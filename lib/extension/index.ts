@@ -3,6 +3,7 @@ import Router from '@koa/router'
 
 import { next, register } from "./extensionsApi.js";
 import { getParameter, getParameters } from './ssm.js';
+import { logger } from './logging.js';
 
 const app = new Koa()
 const router = new Router()
@@ -18,11 +19,15 @@ app
 app.listen(3000)
 
 const main = async () => {
-  console.log('register');
+  logger.debug('Registering extension')
   const extensionId = await register();
-  console.log('extensionId', extensionId);
+  logger.debug({
+    extensionId
+  })
 
+  logger.info('Server is ready to receive requests')
   while (true) {
+    logger.debug('Waiting for next invocation')
     await next(extensionId!)
   }
 }
