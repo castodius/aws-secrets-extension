@@ -3,9 +3,11 @@ import Router from '@koa/router'
 
 import { next, register } from "./extensionsApi.js";
 import { getParameter, getParameters } from './ssm.js';
+import { logger } from './logging.js';
 
 const app = new Koa()
 const router = new Router()
+const port = 3000
 
 router.get('/systemsmanager/parameters/:parameterName', getParameter)
 router.get('/ssm/parameters/:parameterName', getParameter)
@@ -15,14 +17,18 @@ app
   .use(router.routes())
   .use(router.allowedMethods())
 
-app.listen(3000)
+app.listen(port)
 
 const main = async () => {
-  console.log('register');
+  logger.debug('Registering extension')
   const extensionId = await register();
-  console.log('extensionId', extensionId);
+  logger.debug({
+    extensionId
+  })
 
+  logger.info(`AWS Secrets Extension server is ready to receive requests on port ${port}`)
   while (true) {
+    logger.debug('Waiting for next invocation')
     await next(extensionId!)
   }
 }

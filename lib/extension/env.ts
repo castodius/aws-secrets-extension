@@ -29,8 +29,8 @@ export const getVariableBoolean = (suffix: string, defaultValue: boolean): boole
   return variable === 'true'
 }
 
-export const getVariableEnum = (suffix: string, allowedValues: string[], defaultValue: string): string => {
-  const variable = getVariable(suffix)
+export const getVariableEnum = <T extends string>(suffix: string, allowedValues: T[], defaultValue: T): T => {
+  const variable = getVariable(suffix) as T | undefined
   if (!variable) {
     return defaultValue
   }
@@ -40,4 +40,9 @@ export const getVariableEnum = (suffix: string, allowedValues: string[], default
   }
 
   return variable
+}
+
+export const variables = {
+  LOG_FORMAT: getVariableEnum('LOG_FORMAT', ['json', 'text'], 'json'),
+  LOG_LEVEL: getVariableEnum('LOG_LEVEL', ['debug', 'info', 'warn', 'error'], 'info')
 }
