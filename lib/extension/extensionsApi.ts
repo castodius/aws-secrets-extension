@@ -1,3 +1,5 @@
+import { logger } from "./logging.js";
+
 const baseUrl = `http://${process.env.AWS_LAMBDA_RUNTIME_API}/2020-01-01/extension`;
 
 const call = async (path: string, init: RequestInit) => {
@@ -15,7 +17,10 @@ export const register = async () => {
   });
 
   if (!res.ok) {
-    console.error('register failed', await res.text());
+    logger.error({
+      message: 'Extension registration failed',
+      error: await res.text()
+    });
   }
 
   return res.headers.get('lambda-extension-identifier')!;
@@ -31,7 +36,10 @@ export const next = async (extensionId: string) => {
   });
 
   if (!res.ok) {
-    console.error('next failed', await res.text());
+    logger.error({
+      message: 'Calling next failed',
+      error: await res.text()
+    })
     return null;
   }
 
