@@ -44,5 +44,6 @@ export const getVariableEnum = <T extends string>(suffix: string, allowedValues:
 
 export const variables = {
   LOG_FORMAT: getVariableEnum('LOG_FORMAT', ['json', 'text'], 'json'),
-  LOG_LEVEL: getVariableEnum('LOG_LEVEL', ['debug', 'info', 'warn', 'error'], 'info')
+  LOG_LEVEL: getVariableEnum('LOG_LEVEL', ['debug', 'info', 'warn', 'error'], 'info'),
+  HTTP_PORT: getVariableInt('HTTP_PORT', 2773)
 }
