@@ -1,6 +1,7 @@
 import Koa from 'koa'
 import Router from '@koa/router'
 import { GetParameterCommand, GetParametersCommand, GetParametersCommandOutput, SSMClient, } from '@aws-sdk/client-ssm'
+import { logger } from './logging.js'
 
 type KoaContext = Koa.ParameterizedContext<Koa.DefaultState, Koa.DefaultContext & Router.RouterParamContext<Koa.DefaultState, Koa.DefaultContext>, unknown>
 
@@ -10,15 +11,16 @@ const client = new SSMClient({})
 export const getParameter = async (ctx: KoaContext, next: Koa.Next) => {
   const { parameterName: name } = ctx.params
   const { withDecryption = 'false' } = ctx.query
-  console.log(`Getting ${name}`)
+  logger.debug(`Retrieving SSM Parameter ${name}`)
 
   if (cache[name]) {
-    console.log(`Found cached value for ${name}`)
+    logger.debug(`Returning cached value for ${name}`)
     ctx.body = cache[name]
     await next()
     return
   }
 
+  logger.debug(`Fetch value for ${name} from AWS`)
   const result = await client.send(new GetParameterCommand({
     Name: name,
     WithDecryption: withDecryption === 'true'
@@ -31,20 +33,21 @@ export const getParameter = async (ctx: KoaContext, next: Koa.Next) => {
 
 export const getParameters = async (ctx: KoaContext, next: Koa.Next) => {
   const { names, withDecryption = 'false' } = ctx.query
-  console.log(names)
-
+  
   const values = unpackNames(names)
+  logger.debug(`Retrieving SSM Parameters ${values.join(', ')}`)
   values.sort()
-  console.log(values)
 
   const key = values.join(',')
+  logger.debug(`Cache key "${key}"`)
   if (cache[key]) {
-    console.log(`Found cached value for ${key}`)
+    console.log(`Returning cached value for ${key}`)
     ctx.body = cache[key]
     await next()
     return
   }
 
+  logger.debug(`Fetch value for ${key} from AWS`)
   const result = await client.send(new GetParametersCommand({
     Names: values,
     WithDecryption: withDecryption === 'true'
