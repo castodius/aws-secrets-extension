@@ -7,6 +7,7 @@ describe('Logger', () => {
     it('should handle JSON setting and JSON', () => {
       const fn = vi.fn()
       const logger = new Logger('json', 'debug', fn)
+      fn.mockRestore()
 
       logger.debug({ a: 4711 })
 
@@ -16,6 +17,7 @@ describe('Logger', () => {
     it('should handle JSON setting and string', () => {
       const fn = vi.fn()
       const logger = new Logger('json', 'debug', fn)
+      fn.mockRestore()
 
       logger.debug('hello')
 
@@ -25,6 +27,7 @@ describe('Logger', () => {
     it('should handle text setting and JSON', () => {
       const fn = vi.fn()
       const logger = new Logger('text', 'debug', fn)
+      fn.mockRestore()
 
       logger.debug({ a: 4711 })
 
@@ -34,6 +37,7 @@ describe('Logger', () => {
     it('should handle text setting and text', () => {
       const fn = vi.fn()
       const logger = new Logger('text', 'debug', fn)
+      fn.mockRestore()
 
       logger.debug('hello')
 
@@ -45,6 +49,7 @@ describe('Logger', () => {
     it('should handle log level debug', () => {
       const fn = vi.fn()
       const logger = new Logger('json', 'debug', fn)
+      fn.mockRestore()
 
       logger.debug('wow')
       logger.info('wow')
@@ -57,6 +62,7 @@ describe('Logger', () => {
     it('should handle log level info', () => {
       const fn = vi.fn()
       const logger = new Logger('json', 'info', fn)
+      fn.mockRestore()
 
       logger.debug('wow')
       logger.info('wow')
@@ -69,6 +75,7 @@ describe('Logger', () => {
     it('should handle log level warn', () => {
       const fn = vi.fn()
       const logger = new Logger('json', 'warn', fn)
+      fn.mockRestore()
 
       logger.debug('wow')
       logger.info('wow')
@@ -81,6 +88,7 @@ describe('Logger', () => {
     it('should handle log level error', () => {
       const fn = vi.fn()
       const logger = new Logger('json', 'error', fn)
+      fn.mockRestore()
 
       logger.debug('wow')
       logger.info('wow')
