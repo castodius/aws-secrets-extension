@@ -7,6 +7,7 @@ export default defineConfig({
       provider: 'istanbul',
       include: [
         'lib/extension/env.ts',
+        'lib/extension/logging.ts',
       ],
       thresholds: {
         branches: 100,
