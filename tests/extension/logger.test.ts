@@ -1,17 +1,22 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { Logger } from '#lib/extension/logging.js'
+import { LogFormat, Logger, LogLevel } from '#lib/extension/logging.js'
 
 /**
  * The Logger class logs information as part of the constructor. We reset the mock function after each instantiation to handle this. 
  */
 
 describe('Logger', () => {
+  const setupLogger = (format: LogFormat, level: LogLevel) => {
+    const fn = vi.fn()
+    const logger = new Logger(format, level, fn)
+    fn.mockRestore()
+    return { fn, logger }
+  }
+
   describe('formatting', () => {
     it('should handle JSON setting and JSON', () => {
-      const fn = vi.fn()
-      const logger = new Logger('json', 'debug', fn)
-      fn.mockRestore()
+      const { fn, logger } = setupLogger('json', 'debug')
 
       logger.debug({ a: 4711 })
 
@@ -19,9 +24,7 @@ describe('Logger', () => {
     })
 
     it('should handle JSON setting and string', () => {
-      const fn = vi.fn()
-      const logger = new Logger('json', 'debug', fn)
-      fn.mockRestore()
+      const { fn, logger } = setupLogger('json', 'debug')
 
       logger.debug('hello')
 
@@ -29,9 +32,7 @@ describe('Logger', () => {
     })
 
     it('should handle text setting and JSON', () => {
-      const fn = vi.fn()
-      const logger = new Logger('text', 'debug', fn)
-      fn.mockRestore()
+      const { fn, logger } = setupLogger('text', 'debug')
 
       logger.debug({ a: 4711 })
 
@@ -39,9 +40,7 @@ describe('Logger', () => {
     })
 
     it('should handle text setting and text', () => {
-      const fn = vi.fn()
-      const logger = new Logger('text', 'debug', fn)
-      fn.mockRestore()
+      const {fn, logger} =  setupLogger('text', 'debug')
 
       logger.debug('hello')
 
@@ -51,9 +50,7 @@ describe('Logger', () => {
 
   describe('log level', () => {
     it('should handle log level debug', () => {
-      const fn = vi.fn()
-      const logger = new Logger('json', 'debug', fn)
-      fn.mockRestore()
+      const {fn, logger} =  setupLogger('json', 'debug')
 
       logger.debug('wow')
       logger.info('wow')
@@ -64,9 +61,8 @@ describe('Logger', () => {
     })
 
     it('should handle log level info', () => {
-      const fn = vi.fn()
-      const logger = new Logger('json', 'info', fn)
-      fn.mockRestore()
+      const {fn, logger} =  setupLogger('json', 'info')
+
 
       logger.debug('wow')
       logger.info('wow')
@@ -77,9 +73,7 @@ describe('Logger', () => {
     })
 
     it('should handle log level warn', () => {
-      const fn = vi.fn()
-      const logger = new Logger('json', 'warn', fn)
-      fn.mockRestore()
+      const {fn, logger} = setupLogger('json', 'warn')
 
       logger.debug('wow')
       logger.info('wow')
@@ -90,9 +84,7 @@ describe('Logger', () => {
     })
 
     it('should handle log level error', () => {
-      const fn = vi.fn()
-      const logger = new Logger('json', 'error', fn)
-      fn.mockRestore()
+      const {fn, logger} =  setupLogger('json', 'error')
 
       logger.debug('wow')
       logger.info('wow')
