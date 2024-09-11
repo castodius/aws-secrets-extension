@@ -2,6 +2,10 @@ import { describe, expect, it, vi } from "vitest";
 
 import { Logger } from '#lib/extension/logging.js'
 
+/**
+ * The Logger class logs information as part of the constructor. We reset the mock function after each instantiation to handle this. 
+ */
+
 describe('Logger', () => {
   describe('formatting', () => {
     it('should handle JSON setting and JSON', () => {
