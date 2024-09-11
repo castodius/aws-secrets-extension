@@ -4,7 +4,6 @@ import { fileURLToPath } from 'node:url';
 import { Construct } from 'constructs';
 import { buildSync } from 'esbuild';
 import { Code, LayerVersion } from 'aws-cdk-lib/aws-lambda';
-
     
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -32,7 +31,12 @@ export class AwsSecretsExtension extends LayerVersion {
       external: [],
       outExtension: {
         '.js': '.mjs'
-      }
+      },
+      sourcesContent: false,
+      mainFields: [
+        'module',
+        'main'
+      ]
     })
 
     super(scope, id, {
