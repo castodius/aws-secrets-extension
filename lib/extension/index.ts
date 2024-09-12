@@ -1,8 +1,6 @@
 import { next, register } from "./extensionsApi.js";
 import { logger } from './logging.js';
-import { startServer } from "./server.js";
-
-startServer()
+import './server.js'
 
 const main = async () => {
   logger.debug('Registering extension')

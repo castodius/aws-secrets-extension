@@ -1,14 +1,11 @@
-import Koa from 'koa'
-import Router from '@koa/router'
 import { GetParameterCommand, GetParametersCommand, GetParametersCommandOutput, SSMClient, } from '@aws-sdk/client-ssm'
 import { logger } from './logging.js'
-
-type KoaContext = Koa.ParameterizedContext<Koa.DefaultState, Koa.DefaultContext & Router.RouterParamContext<Koa.DefaultState, Koa.DefaultContext>, unknown>
+import { KoaContext, KoaNext } from './koa.js'
 
 const cache: Record<string, string> = {}
 const client = new SSMClient({})
 
-export const getParameter = async (ctx: KoaContext, next: Koa.Next) => {
+export const getParameter = async (ctx: KoaContext, next: KoaNext) => {
   const { parameterName: name } = ctx.params
   const { withDecryption = 'false' } = ctx.query
   logger.debug(`Retrieving SSM Parameter ${name}`)
@@ -31,7 +28,7 @@ export const getParameter = async (ctx: KoaContext, next: Koa.Next) => {
   await next()
 }
 
-export const getParameters = async (ctx: KoaContext, next: Koa.Next) => {
+export const getParameters = async (ctx: KoaContext, next: KoaNext) => {
   const { names, withDecryption = 'false' } = ctx.query
   
   const values = unpackNames(names)
