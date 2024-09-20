@@ -1,8 +1,9 @@
 import { GetParameterCommand, GetParametersCommand, GetParametersCommandOutput, SSMClient, } from '@aws-sdk/client-ssm'
+
 import { logger } from './logging.js'
 import { KoaContext, KoaNext } from './koa.js'
+import { cache } from './cache.js'
 
-const cache: Record<string, string> = {}
 const client = new SSMClient({})
 
 export const getParameter = async (ctx: KoaContext, next: KoaNext) => {
@@ -10,50 +11,45 @@ export const getParameter = async (ctx: KoaContext, next: KoaNext) => {
   const { withDecryption = 'false' } = ctx.query
   logger.debug(`Retrieving SSM Parameter ${name}`)
 
-  if (cache[name]) {
-    logger.debug(`Returning cached value for ${name}`)
-    ctx.body = cache[name]
-    await next()
-    return
-  }
+  const item = await cache.getOrRetrieve({
+    service: 'ssm',
+    key: name,
+    getter: () => client.send(new GetParameterCommand({
+      Name: name,
+      WithDecryption: withDecryption === 'true'
+    }))
+      .then((response) => JSON.stringify(response))
+  })
 
-  logger.debug(`Fetch value for ${name} from AWS`)
-  const result = await client.send(new GetParameterCommand({
-    Name: name,
-    WithDecryption: withDecryption === 'true'
-  }))
-
-  cache[name] = JSON.stringify(result)
-  ctx.body = cache[name]
+  ctx.body = item
   await next()
 }
 
 export const getParameters = async (ctx: KoaContext, next: KoaNext) => {
   const { names, withDecryption = 'false' } = ctx.query
-  
+
   const values = unpackNames(names)
   logger.debug(`Retrieving SSM Parameters ${values.join(', ')}`)
   values.sort()
 
   const key = values.join(',')
   logger.debug(`Cache key "${key}"`)
-  if (cache[key]) {
-    console.log(`Returning cached value for ${key}`)
-    ctx.body = cache[key]
-    await next()
-    return
-  }
 
-  logger.debug(`Fetch value for ${key} from AWS`)
-  const result = await client.send(new GetParametersCommand({
-    Names: values,
-    WithDecryption: withDecryption === 'true'
-  }))
+  const item = await cache.getOrRetrieve({
+    service: 'ssm',
+    key,
+    getter: () => client.send(new GetParametersCommand({
+      Names: values,
+      WithDecryption: withDecryption === 'true'
+    }))
+      .then((response) => {
+        cacheIndividualValues(response, key)
+        return response
+      })
+      .then((response) => JSON.stringify(response))
+  })
 
-  cache[key] = JSON.stringify(result)
-  ctx.body = cache[key]
-  cacheIndividualValues(result)
-
+  ctx.body = item
   await next()
 }
 
@@ -68,12 +64,22 @@ const unpackNames = (names: string | string[] | undefined): string[] => {
   return names.split(',')
 }
 
-const cacheIndividualValues = (result: GetParametersCommandOutput) => {
+const cacheIndividualValues = (result: GetParametersCommandOutput, key: string) => {
+  logger.debug(`Caching individual values of SSM GetParameters request for names ${key}`)
   for (const parameter of result.Parameters!) {
     const arn = parameter.ARN!
     const name = arn.match(/.*:parameter\/(.*)/)![1]
+    const item = JSON.stringify(parameter)
 
-    cache[arn] = JSON.stringify(parameter)
-    cache[name] = JSON.stringify(parameter)
+    cache.add({
+      service: 'ssm',
+      key: arn,
+      item
+    })
+    cache.add({
+      service: 'ssm',
+      key: name,
+      item
+    })
   }
 }
