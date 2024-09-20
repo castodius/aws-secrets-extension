@@ -8,6 +8,7 @@ export default defineConfig({
       include: [
         'lib/extension/env.ts',
         'lib/extension/logging.ts',
+        'lib/extension/cache.ts',
       ],
       thresholds: {
         branches: 100,
