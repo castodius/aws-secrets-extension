@@ -68,7 +68,7 @@ const cacheIndividualValues = (result: GetParametersCommandOutput, key: string) 
   logger.debug(`Caching individual values of SSM GetParameters request for names ${key}`)
   for (const parameter of result.Parameters!) {
     const arn = parameter.ARN!
-    const name = arn.match(/.*:parameter\/(.*)/)![1]
+    const name = parameter.Name!
     const item = JSON.stringify(parameter)
 
     cache.add({
