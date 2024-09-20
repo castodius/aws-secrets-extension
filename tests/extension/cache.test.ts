@@ -10,7 +10,7 @@ describe('Cache', () => {
       const output = await cache.add({
         key: 'k',
         service: 's',
-        getter: () => Promise.resolve('wow')
+        item: 'wow'
       })
 
       expect(output).toEqual('wow')
@@ -23,7 +23,7 @@ describe('Cache', () => {
       const output = await cache.add({
         key: 'k',
         service: 's',
-        getter: () => Promise.resolve('wow')
+        item: 'wow'
       })
 
       expect(output).toEqual('wow')
@@ -35,10 +35,10 @@ describe('Cache', () => {
     it('should return cached items', async () => {
       const cache = new Cache(1000)
 
-      await cache.add({
+      cache.add({
         key: 'k',
         service: 's',
-        getter: () => Promise.resolve('wow')
+        item: 'wow'
       })
       const output = cache.get({
         key: 'k',
@@ -64,7 +64,7 @@ describe('Cache', () => {
     it('should get and add item', async () => {
       const cache = new Cache(1000)
 
-      const output = await cache.getOrAdd({
+      const output = await cache.getOrRetrieve({
         key: 'k',
         service: 's',
         getter: () => Promise.resolve('wow')
@@ -76,12 +76,12 @@ describe('Cache', () => {
     it('should return already cached item', async () => {
       const cache = new Cache(1000)
 
-      await cache.add({
+      cache.add({
         key: 'k',
         service: 's',
-        getter: () => Promise.resolve('wow')
+        item: 'wow'
       })
-      const output = await cache.getOrAdd({
+      const output = await cache.getOrRetrieve({
         key: 'k',
         service: 's',
         getter: () => Promise.resolve('wow')

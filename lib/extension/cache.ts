@@ -7,9 +7,12 @@ export interface GetParams {
 }
 
 export interface AddParams extends GetParams {
-  getter: () => Promise<string>
+  readonly item: string
 }
 
+export interface RetrieveParams extends GetParams {
+  readonly getter: () => Promise<string>
+}
 
 export class Cache {
   #cache: Record<string, Record<string, string>> = {}
@@ -20,11 +23,9 @@ export class Cache {
     this.#maxItems = maxItems
   }
 
-  public async add(params: AddParams): Promise<string> {
-    const { service, key } = params
-    const item = await params.getter()
+  public add(params: AddParams): string {
+    const { service, key, item } = params
 
-    logger.debug(`Successfully retrieved ${key} for ${service} from AWS`)
     if(this.#itemCount < this.#maxItems){
       logger.debug(`Item count is below max items, adding ${key} for ${service}`)
       this.getServiceCache(service)[params.key] = item
@@ -48,16 +49,31 @@ export class Cache {
     return item
   }
 
-  public async getOrAdd(params: AddParams): Promise<string> {
+  public async getOrRetrieve(params: RetrieveParams): Promise<string> {
     const cachedItem = this.get(params)
     if (cachedItem) {
       return cachedItem
     }
-    return this.add(params)
+    return this.retrieveAndAdd(params)
   }
 
   public size(): number {
     return this.#itemCount
+  }
+
+  private async retrieveAndAdd(params: RetrieveParams): Promise<string> {
+    const { service, key, getter } = params
+    
+    logger.debug(`Retrieving ${key} for ${service} from AWS`)
+    const item = await getter()
+    logger.debug(`Successfully retrieved ${key} for ${service} from AWS`)
+
+    this.add({
+      service,
+      key,
+      item
+    })
+    return item
   }
 
   private getServiceCache(service: string): Record<string, string> {
