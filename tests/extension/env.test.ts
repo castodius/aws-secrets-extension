@@ -5,9 +5,9 @@ import { getVariable, getVariableBoolean, getVariableEnum, getVariableInt } from
 describe('Environment variable helper', () => {
   describe('getVariable', () => {
     it('should return variable', () => {
-      process.env.AWS_SECRETS_EXTENSION__FIRST = 'bar'
+      process.env.AWS_SECRETS_EXTENSION_FIRST = 'bar'
 
-      const output = getVariable('_FIRST')
+      const output = getVariable('FIRST')
 
       expect(output).toEqual('bar')
     })
