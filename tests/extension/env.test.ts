@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 
-import { getVariable, getVariableBoolean, getVariableEnum, getVariableInt } from '#lib/extension/env.js'
+import { getVariable, getVariableBoolean, getVariableEnum, getVariableInt, getVariableString } from '#lib/extension/env.js'
 
 describe('Environment variable helper', () => {
   describe('getVariable', () => {
@@ -21,6 +21,24 @@ describe('Environment variable helper', () => {
       expect(output).toEqual('bar')
     })
   })
+  describe('getVariableString', () => {
+    it('should return string', () => {
+      process.env.AWS_SECRETS_EXTENSION_PREFIX = 'GET_VARIABLE_STRING'
+      process.env.GET_VARIABLE_STRING_FIRST = 'bar'
+
+      const output = getVariableString('FIRST', 'nope')
+
+      expect(output).toEqual('bar')
+    })
+
+    it('should return default value if', () => {
+      process.env.AWS_SECRETS_EXTENSION_PREFIX = 'GET_VARIABLE_STRING'
+      
+      const output = getVariableString('FOO', 'fallback')
+
+      expect(output).toEqual('fallback')
+    })
+  })
 
   describe('getVariableInt', () => {
     it('should parse int', () => {
@@ -32,7 +50,7 @@ describe('Environment variable helper', () => {
       expect(output).toEqual(5)
     })
 
-    it('should return default value is not set', () => {
+    it('should return default value if not set', () => {
       process.env.AWS_SECRETS_EXTENSION_PREFIX = 'GET_VARIABLE_INT'
 
       const output = getVariableInt('NOPE', 7)
