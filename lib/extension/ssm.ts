@@ -1,4 +1,5 @@
 import { GetParameterCommand, GetParametersCommand, GetParametersCommandOutput, SSMClient, } from '@aws-sdk/client-ssm'
+import { tap } from 'rambda'
 
 import { logger } from './logging.js'
 import { Getter, GetterParams, KoaContext, KoaNext } from './koa.js'
@@ -40,10 +41,7 @@ export const getParameters: Getter = async (params: GetterParams) => {
       Names: values,
       WithDecryption: withDecryption === 'true'
     }))
-      .then((response) => {
-        cacheIndividualValues(response, key)
-        return response
-      })
+      .then(tap(cacheIndividualValues(key)))
       .then(JSON.stringify)
   })
 }
@@ -58,7 +56,7 @@ const unpackNames = (names: string | string[] | undefined): string[] => {
   return names.split(',')
 }
 
-const cacheIndividualValues = (result: GetParametersCommandOutput, key: string) => {
+const cacheIndividualValues = (key: string) => (result: GetParametersCommandOutput) => {
   logger.debug(`Caching individual values of SSM GetParameters request for names ${key}`)
   for (const parameter of result.Parameters!) {
     const arn = parameter.ARN!
