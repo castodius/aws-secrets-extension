@@ -2,6 +2,7 @@ import { variables } from "./env.js";
 import { next, register } from "./extensionsApi.js";
 import { logger } from './logging.js';
 import './server.js'
+import { getSecretValue } from "./sm.js";
 import { getParameter, getParameters } from "./ssm.js";
 
 const main = async () => {
@@ -28,7 +29,15 @@ const main = async () => {
     await Promise.all(
       variables.PREFETCH_SSM_GET_PARAMETER
         .map((parameterName) => getParameter({ parameterName, withDecryption: 'true' }))
-    )    
+    )
+  }
+
+  if (variables.PREFETCH_SM_GET_SECRET_VALUE.length) {
+    logger.info('Prefetching Secrets Manager secret values')
+    await Promise.all(
+      variables.PREFETCH_SM_GET_SECRET_VALUE
+        .map((secretId) => getSecretValue({ secretId }))
+    )
   }
 
   while (true) {

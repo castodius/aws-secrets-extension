@@ -2,13 +2,14 @@ import Koa from 'koa'
 import Router from '@koa/router'
 
 import * as ssm from './ssm.js';
+import * as sm from './sm.js';
 import { logger } from './logging.js';
 import { variables } from './env.js';
-import { getSecretValue } from './sm.js';
 import { wrapGetter } from './koa.js';
 
 const getParameter = wrapGetter(ssm.getParameter)
 const getParameters = wrapGetter(ssm.getParameters)
+const getSecretValue = wrapGetter(sm.getSecretValue)
 
 const router = new Router()
 
