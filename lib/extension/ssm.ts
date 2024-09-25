@@ -1,32 +1,30 @@
 import { GetParameterCommand, GetParametersCommand, GetParametersCommandOutput, SSMClient, } from '@aws-sdk/client-ssm'
 
 import { logger } from './logging.js'
-import { KoaContext, KoaNext } from './koa.js'
+import { Getter, GetterParams, KoaContext, KoaNext } from './koa.js'
 import { cache } from './cache.js'
 
 const client = new SSMClient({})
 
-export const getParameter = async (ctx: KoaContext, next: KoaNext) => {
-  const { parameterName: name } = ctx.params
-  const { withDecryption = 'false' } = ctx.query
+export const getParameter: Getter = async (params: GetterParams) => {
+  const { parameterName, withDecryption = 'false' } = params
+  // safe casting, parameterName is a path parameter
+  const name = parameterName as string
   logger.debug(`Retrieving SSM Parameter ${name}`)
 
-  const item = await cache.getOrRetrieve({
+  return cache.getOrRetrieve({
     service: 'ssm',
     key: name,
     getter: () => client.send(new GetParameterCommand({
       Name: name,
       WithDecryption: withDecryption === 'true'
     }))
-      .then((response) => JSON.stringify(response))
+      .then(JSON.stringify)
   })
-
-  ctx.body = item
-  await next()
 }
 
-export const getParameters = async (ctx: KoaContext, next: KoaNext) => {
-  const { names, withDecryption = 'false' } = ctx.query
+export const getParameters: Getter = async (params: GetterParams) => {
+  const { names, withDecryption = 'false' } = params
 
   const values = unpackNames(names)
   logger.debug(`Retrieving SSM Parameters ${values.join(', ')}`)
@@ -35,7 +33,7 @@ export const getParameters = async (ctx: KoaContext, next: KoaNext) => {
   const key = values.join(',')
   logger.debug(`Cache key "${key}"`)
 
-  const item = await cache.getOrRetrieve({
+  return cache.getOrRetrieve({
     service: 'ssm',
     key,
     getter: () => client.send(new GetParametersCommand({
@@ -46,13 +44,9 @@ export const getParameters = async (ctx: KoaContext, next: KoaNext) => {
         cacheIndividualValues(response, key)
         return response
       })
-      .then((response) => JSON.stringify(response))
+      .then(JSON.stringify)
   })
-
-  ctx.body = item
-  await next()
 }
-
 
 const unpackNames = (names: string | string[] | undefined): string[] => {
   if (!names) {
