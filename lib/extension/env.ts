@@ -53,4 +53,5 @@ export const variables = {
   CACHE_SIZE: getVariableInt('CACHE_SIZE', 1000),
   PREFETCH_SSM_GET_PARAMETER: getVariableString('PREFETCH_SSM_GET_PARAMETER', '').split(',').filter(Boolean),
   PREFETCH_SSM_GET_PARAMETERS: getVariableString('PREFETCH_SSM_GET_PARAMETERS', '').split(',').filter(Boolean),
+  PREFETCH_SM_GET_SECRET_VALUE: getVariableString('PREFETCH_SM_GET_SECRET_VALUE', '').split(',').filter(Boolean),
 }
