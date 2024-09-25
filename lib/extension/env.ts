@@ -3,6 +3,10 @@ export const getVariable = (suffix: string) => {
   return process.env[`${prefix}_${suffix}`]
 }
 
+export const getVariableString = (suffix: string, defaultValue: string): string => {
+  return getVariable(suffix) ?? defaultValue
+}
+
 export const getVariableInt = (suffix: string, defaultValue: number): number => {
   const variable = getVariable(suffix)
   if (!variable) {
@@ -46,5 +50,6 @@ export const variables = {
   LOG_FORMAT: getVariableEnum('LOG_FORMAT', ['json', 'text'], 'json'),
   LOG_LEVEL: getVariableEnum('LOG_LEVEL', ['debug', 'info', 'warn', 'error'], 'info'),
   HTTP_PORT: getVariableInt('HTTP_PORT', 2773),
-  CACHE_SIZE: getVariableInt('CACHE_SIZE', 1000)
+  CACHE_SIZE: getVariableInt('CACHE_SIZE', 1000),
+  PREFETCH_SSM_GET_PARAMETER: getVariableString('PREFETCH_SSM_GET_PARAMETER', '').split(',').filter(Boolean),
 }
