@@ -8,6 +8,7 @@ import { getSecretValue } from './sm.js';
 import { wrapGetter } from './koa.js';
 
 const getParameter = wrapGetter(ssm.getParameter)
+const getParameters = wrapGetter(ssm.getParameters)
 
 const router = new Router()
 
@@ -29,8 +30,8 @@ router.use(async (ctx, next) => {
 
 router.get('/systemsmanager/parameters/:parameterName', getParameter)
 router.get('/ssm/parameters/:parameterName', getParameter)
-router.get('/systemsmanager/parameters', ssm.getParameters)
-router.get('/ssm/parameters', ssm.getParameters)
+router.get('/systemsmanager/parameters', getParameters)
+router.get('/ssm/parameters', getParameters)
 
 router.get('/secretsmanager/secrets/:secretId', getSecretValue)
 router.get('/sm/secrets/:secretId', getSecretValue)

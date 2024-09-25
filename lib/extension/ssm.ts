@@ -19,12 +19,12 @@ export const getParameter: Getter = async (params: GetterParams) => {
       Name: name,
       WithDecryption: withDecryption === 'true'
     }))
-      .then((response) => JSON.stringify(response))
+      .then(JSON.stringify)
   })
 }
 
-export const getParameters = async (ctx: KoaContext, next: KoaNext) => {
-  const { names, withDecryption = 'false' } = ctx.query
+export const getParameters: Getter = async (params: GetterParams) => {
+  const { names, withDecryption = 'false' } = params
 
   const values = unpackNames(names)
   logger.debug(`Retrieving SSM Parameters ${values.join(', ')}`)
@@ -33,7 +33,7 @@ export const getParameters = async (ctx: KoaContext, next: KoaNext) => {
   const key = values.join(',')
   logger.debug(`Cache key "${key}"`)
 
-  const item = await cache.getOrRetrieve({
+  return cache.getOrRetrieve({
     service: 'ssm',
     key,
     getter: () => client.send(new GetParametersCommand({
@@ -44,11 +44,8 @@ export const getParameters = async (ctx: KoaContext, next: KoaNext) => {
         cacheIndividualValues(response, key)
         return response
       })
-      .then((response) => JSON.stringify(response))
+      .then(JSON.stringify)
   })
-
-  ctx.body = item
-  await next()
 }
 
 const unpackNames = (names: string | string[] | undefined): string[] => {
