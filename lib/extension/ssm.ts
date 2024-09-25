@@ -1,17 +1,18 @@
 import { GetParameterCommand, GetParametersCommand, GetParametersCommandOutput, SSMClient, } from '@aws-sdk/client-ssm'
 
 import { logger } from './logging.js'
-import { KoaContext, KoaNext } from './koa.js'
+import { Getter, GetterParams, KoaContext, KoaNext } from './koa.js'
 import { cache } from './cache.js'
 
 const client = new SSMClient({})
 
-export const getParameter = async (ctx: KoaContext, next: KoaNext) => {
-  const { parameterName: name } = ctx.params
-  const { withDecryption = 'false' } = ctx.query
+export const getParameter: Getter = async (params: GetterParams) => {
+  const { parameterName, withDecryption = 'false' } = params
+  // safe casting, parameterName is a path parameter
+  const name = parameterName as string
   logger.debug(`Retrieving SSM Parameter ${name}`)
 
-  const item = await cache.getOrRetrieve({
+  return cache.getOrRetrieve({
     service: 'ssm',
     key: name,
     getter: () => client.send(new GetParameterCommand({
@@ -20,9 +21,6 @@ export const getParameter = async (ctx: KoaContext, next: KoaNext) => {
     }))
       .then((response) => JSON.stringify(response))
   })
-
-  ctx.body = item
-  await next()
 }
 
 export const getParameters = async (ctx: KoaContext, next: KoaNext) => {
@@ -52,7 +50,6 @@ export const getParameters = async (ctx: KoaContext, next: KoaNext) => {
   ctx.body = item
   await next()
 }
-
 
 const unpackNames = (names: string | string[] | undefined): string[] => {
   if (!names) {
