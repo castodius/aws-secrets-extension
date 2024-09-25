@@ -26,7 +26,7 @@ export class Cache {
   public add(params: AddParams): string {
     const { service, key, item } = params
 
-    if(this.#itemCount < this.#maxItems){
+    if (this.#itemCount < this.#maxItems) {
       logger.debug(`Item count is below max items, adding ${key} for ${service}`)
       this.getServiceCache(service)[params.key] = item
       this.#itemCount++
@@ -63,21 +63,23 @@ export class Cache {
 
   private async retrieveAndAdd(params: RetrieveParams): Promise<string> {
     const { service, key, getter } = params
-    
-    logger.debug(`Retrieving ${key} for ${service} from AWS`)
-    const item = await getter()
-    logger.debug(`Successfully retrieved ${key} for ${service} from AWS`)
 
-    this.add({
-      service,
-      key,
-      item
-    })
-    return item
+    logger.debug(`Retrieving ${key} for ${service} from AWS`)
+    return getter()
+      .then((item: string) => {
+        logger.debug(`Successfully retrieved ${key} for ${service} from AWS`)
+
+        this.add({
+          service,
+          key,
+          item
+        })
+        return item
+      })
   }
 
   private getServiceCache(service: string): Record<string, string> {
-    if(!(service in this.#cache)){
+    if (!(service in this.#cache)) {
       this.#cache[service] = {}
     }
     return this.#cache[service]
