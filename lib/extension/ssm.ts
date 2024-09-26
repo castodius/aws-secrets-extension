@@ -39,8 +39,15 @@ export const getParameter: Getter = async (params: GetterParams) => {
   })
 }
 
+const getParametersSchema = z.object({
+  names: z.string().min(1).or(
+    z.array(z.string()).min(1)
+  ),
+  withDecryption: stringBooleanSchema
+})
+
 export const getParameters: Getter = async (params: GetterParams) => {
-  const { names, withDecryption = 'false' } = params
+  const { names, withDecryption } = validate(getParametersSchema, params)
 
   const values = unpackNames(names)
   logger.debug(`Retrieving SSM Parameters ${values.join(', ')}`)
@@ -54,17 +61,14 @@ export const getParameters: Getter = async (params: GetterParams) => {
     key,
     getter: () => client.send(new GetParametersCommand({
       Names: values,
-      WithDecryption: withDecryption === 'true'
+      WithDecryption: withDecryption
     }))
       .then(tap(cacheIndividualValues(key)))
       .then(JSON.stringify)
   })
 }
 
-const unpackNames = (names: string | string[] | undefined): string[] => {
-  if (!names) {
-    return []
-  }
+const unpackNames = (names: z.infer<typeof getParametersSchema>['names']): string[] => {
   if (Array.isArray(names)) {
     return names
   }
