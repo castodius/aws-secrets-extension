@@ -1,5 +1,5 @@
 import z, { Schema } from 'zod'
-import { BadRequest } from './errors.js'
+import { BadRequestError } from './errors.js'
 
 export const stringBooleanSchema = z
   .enum(["true", "false"])
@@ -9,7 +9,7 @@ export const stringBooleanSchema = z
 export const validate = <T>(schema: Schema<T>, input: unknown): T => {
   const { error, data } = schema.safeParse(input)
   if (error) {
-    throw new BadRequest(JSON.stringify(error.issues))
+    throw new BadRequestError(JSON.stringify(error.issues))
   }
   return data
 }
