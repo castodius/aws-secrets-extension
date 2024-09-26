@@ -16,15 +16,22 @@ export interface RetrieveParams extends GetParams {
 
 export class Cache {
   #cache: Record<string, Record<string, string>> = {}
+  #enabled: boolean
   #itemCount: number = 0
   #maxItems: number
 
-  constructor(maxItems: number) {
+  constructor(maxItems: number, enabled: boolean) {
     this.#maxItems = maxItems
+    this.#enabled = enabled
   }
 
   public add(params: AddParams): string {
     const { service, key, item } = params
+
+    if (!this.#enabled) {
+      logger.debug('Cache is disabled')
+      return item
+    }
 
     if (this.#itemCount < this.#maxItems) {
       logger.debug(`Item count is below max items, adding ${key} for ${service}`)
@@ -86,4 +93,4 @@ export class Cache {
   }
 }
 
-export const cache = new Cache(variables.CACHE_SIZE)
+export const cache = new Cache(variables.CACHE_SIZE, variables.CACHE_ENABLED)

@@ -57,4 +57,5 @@ export const variables = {
   SSM_TIMEOUT: getVariableInt('SSM_TIMEOUT', 0),
   SM_TIMEOUT: getVariableInt('SSM_TIMEOUT', 0),
   MAX_CONNECTIONS: getVariableInt('MAX_CONNECTIONS', 10),
+  CACHE_ENABLED: getVariableBoolean('CACHE_ENABLED', true)
 }
