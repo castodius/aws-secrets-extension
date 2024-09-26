@@ -23,9 +23,7 @@ const getParameterSchema = z.object({
 })
 
 export const getParameter: Getter = async (params: GetterParams) => {
-  const { parameterName, withDecryption} = validate(getParameterSchema, params)
-  // safe casting, parameterName is a path parameter
-  const name = parameterName as string
+  const { parameterName: name, withDecryption} = validate(getParameterSchema, params)
   logger.debug(`Retrieving SSM Parameter ${name} using withDecryption set to ${withDecryption}`)
 
   return cache.getOrRetrieve({
