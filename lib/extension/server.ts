@@ -5,7 +5,7 @@ import * as ssm from './ssm.js';
 import * as sm from './sm.js';
 import { logger } from './logging.js';
 import { variables } from './env.js';
-import { wrapGetter } from './koa.js';
+import { KoaContext, KoaNext, wrapGetter } from './koa.js';
 
 const getParameter = wrapGetter(ssm.getParameter)
 const getParameters = wrapGetter(ssm.getParameters)
@@ -42,6 +42,17 @@ const app = new Koa()
 app
   .use(router.routes())
   .use(router.allowedMethods())
+
+app
+  .use(async (ctx: KoaContext, next: KoaNext) => {
+    if(ctx.status === 404){
+      ctx.status = 404
+      ctx.body = JSON.stringify({
+        message: 'No such resource, please review documentation for available resources'
+      })
+    }
+    return next()
+  })
 
 app.listen(variables.HTTP_PORT)
 logger.info(`AWS Secrets Extension server is ready to receive requests on port ${variables.HTTP_PORT}`)
