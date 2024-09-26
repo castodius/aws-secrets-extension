@@ -3016,6 +3016,7 @@ __metadata:
     rambda: "npm:^9.3.0"
     typescript: "npm:~5.5.3"
     vitest: "npm:^2.0.5"
+    zod: "npm:^3.23.8"
   peerDependencies:
     aws-cdk-lib: 2.156.0
     constructs: ^10.0.0
@@ -5248,5 +5249,12 @@ __metadata:
   version: 1.4.0
   resolution: "ylru@npm:1.4.0"
   checksum: 10/5437f8eb2fb5dd515845c657dde3cecaa9f6bd4c6386d2a5212d3fafe02189c7d8ebfdfc84940a7811607cb3524eb362ce95d3180d355cd5deb610aa8c82c9bc
+  languageName: node
+  linkType: hard
+
+"zod@npm:^3.23.8":
+  version: 3.23.8
+  resolution: "zod@npm:3.23.8"
+  checksum: 10/846fd73e1af0def79c19d510ea9e4a795544a67d5b34b7e1c4d0425bf6bfd1c719446d94cdfa1721c1987d891321d61f779e8236fde517dc0e524aa851a6eff1
   languageName: node
   linkType: hard

@@ -9,6 +9,8 @@ export default defineConfig({
         'lib/extension/env.ts',
         'lib/extension/logging.ts',
         'lib/extension/cache.ts',
+        'lib/extension/errors.ts',
+        'lib/extension/validation.ts',
       ],
       thresholds: {
         branches: 100,
