@@ -3,8 +3,16 @@ import { GetSecretValueCommand, SecretsManagerClient } from "@aws-sdk/client-sec
 import { Getter, GetterParams, KoaContext, KoaNext } from "./koa.js";
 import { logger } from "./logging.js";
 import { cache } from "./cache.js";
+import { variables } from "./env.js";
 
-const client = new SecretsManagerClient({})
+const client = new SecretsManagerClient({
+  requestHandler: {
+    requestTimeout: variables.SM_TIMEOUT,
+    httpsAgent: {
+      maxSockets: variables.MAX_CONNECTIONS
+    }
+  }
+})
 
 export const getSecretValue: Getter = async (params: GetterParams) => {
   const { secretId, versionId, versionStage } = params
