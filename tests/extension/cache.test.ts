@@ -4,10 +4,10 @@ import { Cache } from '#lib/extension/cache.js'
 
 describe('Cache', () => {
   describe('add', () => {
-    it('should add an item', async () => {
-      const cache = new Cache(1000)
+    it('should add an item', () => {
+      const cache = new Cache(1000, true)
 
-      const output = await cache.add({
+      const output = cache.add({
         key: 'k',
         service: 's',
         item: 'wow'
@@ -17,10 +17,23 @@ describe('Cache', () => {
       expect(cache.size()).toEqual(1)
     })
 
-    it('should not add an item if cache size is set to 0', async () => {
-      const cache = new Cache(0)
+    it('should not add an item if cache size is set to 0', () => {
+      const cache = new Cache(0, true)
 
-      const output = await cache.add({
+      const output = cache.add({
+        key: 'k',
+        service: 's',
+        item: 'wow'
+      })
+
+      expect(output).toEqual('wow')
+      expect(cache.size()).toEqual(0)
+    })
+
+    it('should not add an item if cache is disabled', () => {
+      const cache = new Cache(0, false)
+
+      const output = cache.add({
         key: 'k',
         service: 's',
         item: 'wow'
@@ -33,7 +46,7 @@ describe('Cache', () => {
 
   describe('get', () => {
     it('should return cached items', async () => {
-      const cache = new Cache(1000)
+      const cache = new Cache(1000, true)
 
       cache.add({
         key: 'k',
@@ -49,7 +62,7 @@ describe('Cache', () => {
     })
 
     it('should nothing if nothing is found', () => {
-      const cache = new Cache(1000)
+      const cache = new Cache(1000, true)
 
       const output = cache.get({
         key: 'k',
@@ -62,7 +75,7 @@ describe('Cache', () => {
 
   describe('getOrAdd', () => {
     it('should get and add item', async () => {
-      const cache = new Cache(1000)
+      const cache = new Cache(1000, true)
 
       const output = await cache.getOrRetrieve({
         key: 'k',
@@ -74,7 +87,7 @@ describe('Cache', () => {
     })
 
     it('should return already cached item', async () => {
-      const cache = new Cache(1000)
+      const cache = new Cache(1000, true)
 
       cache.add({
         key: 'k',
