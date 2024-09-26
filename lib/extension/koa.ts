@@ -1,5 +1,6 @@
 import Koa from 'koa'
 import Router from '@koa/router'
+import { HttpError } from './errors.js'
 
 export type KoaContext = Koa.ParameterizedContext<Koa.DefaultState, Koa.DefaultContext & Router.RouterParamContext<Koa.DefaultState, Koa.DefaultContext>, unknown>
 export type KoaNext = Koa.Next
@@ -16,5 +17,14 @@ export const wrapGetter = (getter: Getter) => async (ctx: KoaContext, next: KoaN
     .then((response) => {
       ctx.body = response
     })
-    .then(next)
+    .catch((err: unknown) => {
+      if (err instanceof HttpError) {
+        ctx.body = err.message
+        ctx.status = err.status
+      } else {
+        ctx.body = 'Something went wrong'
+        ctx.status = 418
+      }
+    })
+    .finally(next)
 }
