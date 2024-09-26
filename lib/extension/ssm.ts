@@ -1,10 +1,12 @@
 import { GetParameterCommand, GetParametersCommand, GetParametersCommandOutput, SSMClient, } from '@aws-sdk/client-ssm'
 import { tap } from 'rambda'
+import z from 'zod'
 
 import { logger } from './logging.js'
 import { Getter, GetterParams, KoaContext, KoaNext } from './koa.js'
 import { cache } from './cache.js'
 import { variables } from './env.js'
+import { stringBooleanSchema, validate } from './validation.js'
 
 const client = new SSMClient({
   requestHandler: {
@@ -15,18 +17,23 @@ const client = new SSMClient({
   }
 })
 
+const getParameterSchema = z.object({
+  parameterName: z.string(),
+  withDecryption: stringBooleanSchema
+})
+
 export const getParameter: Getter = async (params: GetterParams) => {
-  const { parameterName, withDecryption = 'false' } = params
+  const { parameterName, withDecryption} = validate(getParameterSchema, params)
   // safe casting, parameterName is a path parameter
   const name = parameterName as string
-  logger.debug(`Retrieving SSM Parameter ${name}`)
+  logger.debug(`Retrieving SSM Parameter ${name} using withDecryption set to ${withDecryption}`)
 
   return cache.getOrRetrieve({
     service: 'ssm',
     key: name,
     getter: () => client.send(new GetParameterCommand({
       Name: name,
-      WithDecryption: withDecryption === 'true'
+      WithDecryption: withDecryption
     }))
       .then(JSON.stringify)
   })
