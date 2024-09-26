@@ -4,8 +4,16 @@ import { tap } from 'rambda'
 import { logger } from './logging.js'
 import { Getter, GetterParams, KoaContext, KoaNext } from './koa.js'
 import { cache } from './cache.js'
+import { variables } from './env.js'
 
-const client = new SSMClient({})
+const client = new SSMClient({
+  requestHandler: {
+    requestTimeout: variables.SSM_TIMEOUT,
+    httpsAgent: {
+      maxSockets: variables.MAX_CONNECTIONS
+    }
+  }
+})
 
 export const getParameter: Getter = async (params: GetterParams) => {
   const { parameterName, withDecryption = 'false' } = params
