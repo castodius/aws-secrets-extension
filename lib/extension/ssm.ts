@@ -23,8 +23,6 @@ const getParameterSchema = z.object({
   ttl: stringIntegerSchema.min(-1).default(variables.SSM_TTL)
 })
 
-type A = z.output<typeof getParameterSchema>
-
 export const getParameter: Getter = async (params: GetterParams) => {
   const { parameterName: name, withDecryption, ttl } = validate(getParameterSchema, params)
   logger.debug(`Retrieving SSM Parameter ${name} using withDecryption set to ${withDecryption}`)
