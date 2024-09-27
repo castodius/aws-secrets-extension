@@ -4,7 +4,7 @@ import { Cache, INFINITE_TTL } from '#lib/extension/cache.js'
 
 describe('Cache', () => {
   beforeEach(() => {
-    const date = new Date(2024, 8, 26, 19)
+    const date = new Date(1727370000000)
     vi.setSystemTime(date)
   })
 
@@ -172,7 +172,7 @@ describe('Cache', () => {
         ttl: 10
       })
       // one hour later
-      const date = new Date(2024, 8, 26, 20)
+      const date = new Date(1727373600000)
       vi.setSystemTime(date)
 
       const output = cache.get({
