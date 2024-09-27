@@ -20,6 +20,7 @@ describe('Cache', () => {
       })
 
       expect(output).toEqual({
+        key: 'k',
         "addedAt": 1727370000,
         "cached": true,
         "item": "wow",
@@ -39,6 +40,7 @@ describe('Cache', () => {
       })
 
       expect(output).toEqual({
+        key: 'k',
         "addedAt": 1727370000,
         "cached": true,
         "item": "wow",
@@ -58,6 +60,7 @@ describe('Cache', () => {
       })
 
       expect(output).toEqual({
+        key: 'k',
         "addedAt": 0,
         "cached": false,
         "item": "wow",
@@ -77,6 +80,7 @@ describe('Cache', () => {
       })
 
       expect(output).toEqual({
+        key: 'k',
         "addedAt": 0,
         "cached": false,
         "item": "wow",
@@ -96,6 +100,7 @@ describe('Cache', () => {
       })
 
       expect(output).toEqual({
+        key: 'k',
         "addedAt": 0,
         "cached": false,
         "item": "wow",
@@ -121,6 +126,7 @@ describe('Cache', () => {
       })
 
       expect(output).toEqual({
+        key: 'k',
         "addedAt": 1727370000,
         "cached": true,
         "item": "wow",
@@ -145,6 +151,7 @@ describe('Cache', () => {
       })
 
       expect(output).toEqual({
+        key: 'k',
         "addedAt": 1727370000,
         "cached": true,
         "item": "wow",
@@ -196,6 +203,7 @@ describe('Cache', () => {
       })
 
       expect(output).toEqual({
+        key: 'k',
         "addedAt": 1727370000,
         "cached": true,
         "item": "wow",
@@ -220,6 +228,7 @@ describe('Cache', () => {
       })
 
       expect(output).toEqual({
+        key: 'k',
         "addedAt": 1727370000,
         "cached": true,
         "item": "wow",
