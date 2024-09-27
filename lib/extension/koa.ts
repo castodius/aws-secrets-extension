@@ -18,6 +18,12 @@ export const wrapGetter = (getter: Getter) => async (ctx: KoaContext, next: KoaN
   })
     .then((response) => {
       ctx.body = response.item as string
+      ctx.set('X-Secrets-Extension-Is-Cached', response.cached.toString())
+      if (response.cached) {
+        ctx.set('X-Secrets-Extension-Cached-At', response.addedAt.toString())
+        ctx.set('X-Secrets-Extension-Expires-At', response.expiresAt.toString())
+        ctx.set('X-Secrets-Extension-Cache-Key', response.key)
+      }
     })
     .catch((err: unknown) => {
       if (err instanceof HttpError) {

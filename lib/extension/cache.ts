@@ -18,6 +18,7 @@ export interface RetrieveParams extends GetParams {
 }
 
 export interface CachedItem {
+  readonly key: string
   readonly item: string
   readonly expiresAt: number
   readonly addedAt: number
@@ -51,6 +52,7 @@ export class Cache {
         logger.debug(`Item count is at max items. ${key} for ${service} will not be added`)
       }
       return {
+        key,
         item,
         expiresAt: 0,
         addedAt: 0,
@@ -59,16 +61,19 @@ export class Cache {
     }
 
     logger.debug(`Item count is below max items, adding ${key} for ${service}`)
+    const epoch = getCurrentEpoch()
     const cachedItem: CachedItem = {
+      key,
       item,
-      expiresAt: INFINITE_TTL === ttl ? ttl : getCurrentEpoch() + ttl,
-      addedAt: +new Date() / 1000,
+      expiresAt: INFINITE_TTL === ttl ? ttl : epoch + ttl,
+      addedAt: epoch,
       cached: true
     }
     logger.debug({
       message: 'Item set to expire at',
       expiresAt: cachedItem.expiresAt,
     })
+
     this.getServiceCache(service)[params.key] = cachedItem
     this.#itemCount++
     return cachedItem
