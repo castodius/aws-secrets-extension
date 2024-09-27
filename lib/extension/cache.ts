@@ -61,17 +61,19 @@ export class Cache {
     }
 
     logger.debug(`Item count is below max items, adding ${key} for ${service}`)
+    const epoch = getCurrentEpoch()
     const cachedItem: CachedItem = {
       key,
       item,
-      expiresAt: INFINITE_TTL === ttl ? ttl : getCurrentEpoch() + ttl,
-      addedAt: getCurrentEpoch(),
+      expiresAt: INFINITE_TTL === ttl ? ttl : epoch + ttl,
+      addedAt: epoch,
       cached: true
     }
     logger.debug({
       message: 'Item set to expire at',
       expiresAt: cachedItem.expiresAt,
     })
+
     this.getServiceCache(service)[params.key] = cachedItem
     this.#itemCount++
     return cachedItem
