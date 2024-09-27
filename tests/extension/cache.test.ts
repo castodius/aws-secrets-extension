@@ -128,6 +128,30 @@ describe('Cache', () => {
       })
     })
 
+    it('should keep items with TTL set to infinity for forever', async () => {
+      const cache = new Cache(1000, true)
+      cache.add({
+        key: 'k',
+        service: 's',
+        item: 'wow',
+        ttl: INFINITE_TTL
+      })
+      const date = new Date(3024, 8, 26, 19)
+      vi.setSystemTime(date)
+
+      const output = cache.get({
+        key: 'k',
+        service: 's'
+      })
+
+      expect(output).toEqual({
+        "addedAt": 1727370000,
+        "cached": true,
+        "item": "wow",
+        "expiresAt": -1,
+      })
+    })
+
     it('should nothing if nothing is found', () => {
       const cache = new Cache(1000, true)
 

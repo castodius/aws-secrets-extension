@@ -65,6 +65,10 @@ export class Cache {
       addedAt: +new Date() / 1000,
       cached: true
     }
+    logger.debug({
+      message: 'Item set to expire at',
+      expiresAt: cachedItem.expiresAt,
+    })
     this.getServiceCache(service)[params.key] = cachedItem
     this.#itemCount++
     return cachedItem
@@ -77,11 +81,19 @@ export class Cache {
     const item = this.getServiceCache(service)[key]
     if (!item) {
       logger.debug(`No item found for ${key} for ${service}`)
-    } else {
-      logger.debug(`Item found for ${key} for ${service}`)
-      if (item.expiresAt < getCurrentEpoch()) {
-        return undefined
-      }
+      return undefined
+    }
+
+    logger.debug(`Item found for ${key} for ${service}`)
+
+    if(item.expiresAt === INFINITE_TTL){
+      logger.debug('Item has infinite TTL')
+      return item
+    }
+
+    if (item.expiresAt < getCurrentEpoch()) {
+      logger.debug('Item has expired')
+      return undefined
     }
     return item
   }
