@@ -1,13 +1,15 @@
 import Koa from 'koa'
 import Router from '@koa/router'
+
 import { HttpError } from './errors.js'
+import { CachedItem } from './cache.js'
 
 export type KoaContext = Koa.ParameterizedContext<Koa.DefaultState, Koa.DefaultContext & Router.RouterParamContext<Koa.DefaultState, Koa.DefaultContext>, unknown>
 export type KoaNext = Koa.Next
 export type GetterParams = {
   [key: string]: string[] | string | undefined
 }
-export type Getter = (params: GetterParams) => Promise<string>
+export type Getter = (params: GetterParams) => Promise<CachedItem>
 
 export const wrapGetter = (getter: Getter) => async (ctx: KoaContext, next: KoaNext) => {
   return getter({
@@ -15,7 +17,7 @@ export const wrapGetter = (getter: Getter) => async (ctx: KoaContext, next: KoaN
     ...ctx.params
   })
     .then((response) => {
-      ctx.body = response
+      ctx.body = response.item as string
     })
     .catch((err: unknown) => {
       if (err instanceof HttpError) {
