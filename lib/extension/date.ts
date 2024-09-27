@@ -1,0 +1,1 @@
+export const getCurrentEpoch = () => +new Date() / 1000
