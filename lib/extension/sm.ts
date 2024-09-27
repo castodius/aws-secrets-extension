@@ -5,7 +5,7 @@ import { Getter, GetterParams, KoaContext, KoaNext } from "./koa.js";
 import { logger } from "./logging.js";
 import { cache } from "./cache.js";
 import { variables } from "./env.js";
-import { validate } from "./validation.js";
+import { stringIntegerSchema, validate } from "./validation.js";
 
 const client = new SecretsManagerClient({
   requestHandler: {
@@ -20,7 +20,7 @@ const getSecretValueSchema = z.object({
   secretId: z.string(),
   versionId: z.string().optional(),
   versionStage: z.string().optional(),
-  ttl: z.number().int().min(-1).default(variables.SM_TTL)
+  ttl: stringIntegerSchema.min(-1).default(variables.SM_TTL)
 })
 
 export const getSecretValue: Getter = async (params: GetterParams) => {
