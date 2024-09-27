@@ -1,4 +1,4 @@
-import z, { Schema } from 'zod'
+import z, { Schema, ZodSchema } from 'zod'
 import { BadRequestError } from './errors.js'
 
 export const stringBooleanSchema = z
@@ -6,7 +6,7 @@ export const stringBooleanSchema = z
   .default('false')
   .transform((v) => v === "true") as unknown as z.ZodDefault<z.ZodBoolean>
 
-export const validate = <T>(schema: Schema<T>, input: unknown): T => {
+export const validate = <T extends ZodSchema>(schema: T, input: unknown): z.output<T> => {
   const { error, data } = schema.safeParse(input)
   if (error) {
     throw new BadRequestError(JSON.stringify(error.issues))

@@ -19,16 +19,20 @@ const client = new SSMClient({
 
 const getParameterSchema = z.object({
   parameterName: z.string(),
-  withDecryption: stringBooleanSchema
+  withDecryption: stringBooleanSchema,
+  ttl: z.number().int().min(-1).default(3600)
 })
 
+type A = z.output<typeof getParameterSchema>
+
 export const getParameter: Getter = async (params: GetterParams) => {
-  const { parameterName: name, withDecryption} = validate(getParameterSchema, params)
+  const { parameterName: name, withDecryption, ttl } = validate(getParameterSchema, params)
   logger.debug(`Retrieving SSM Parameter ${name} using withDecryption set to ${withDecryption}`)
 
   return cache.getOrRetrieve({
     service: 'ssm',
     key: name,
+    ttl,
     getter: () => client.send(new GetParameterCommand({
       Name: name,
       WithDecryption: withDecryption
@@ -41,11 +45,12 @@ const getParametersSchema = z.object({
   names: z.string().min(1).or(
     z.array(z.string()).min(1)
   ),
-  withDecryption: stringBooleanSchema
+  withDecryption: stringBooleanSchema,
+  ttl: z.number().int().min(-1).default(3600)
 })
 
 export const getParameters: Getter = async (params: GetterParams) => {
-  const { names, withDecryption } = validate(getParametersSchema, params)
+  const { names, withDecryption, ttl } = validate(getParametersSchema, params)
 
   const values = unpackNames(names)
   logger.debug(`Retrieving SSM Parameters ${values.join(', ')}`)
@@ -57,11 +62,12 @@ export const getParameters: Getter = async (params: GetterParams) => {
   return cache.getOrRetrieve({
     service: 'ssm',
     key,
+    ttl,
     getter: () => client.send(new GetParametersCommand({
       Names: values,
       WithDecryption: withDecryption
     }))
-      .then(tap(cacheIndividualValues(key)))
+      .then(tap(cacheIndividualValues(key, ttl)))
       .then(JSON.stringify)
   })
 }
@@ -73,7 +79,7 @@ const unpackNames = (names: z.infer<typeof getParametersSchema>['names']): strin
   return names.split(',')
 }
 
-const cacheIndividualValues = (key: string) => (result: GetParametersCommandOutput) => {
+const cacheIndividualValues = (key: string, ttl: number) => (result: GetParametersCommandOutput) => {
   logger.debug(`Caching individual values of SSM GetParameters request for names ${key}`)
   for (const parameter of result.Parameters!) {
     const arn = parameter.ARN!
@@ -83,12 +89,14 @@ const cacheIndividualValues = (key: string) => (result: GetParametersCommandOutp
     cache.add({
       service: 'ssm',
       key: arn,
-      item
+      item,
+      ttl
     })
     cache.add({
       service: 'ssm',
       key: name,
-      item
+      item,
+      ttl
     })
   }
 }

@@ -19,16 +19,18 @@ const client = new SecretsManagerClient({
 const getSecretValueSchema = z.object({
   secretId: z.string(),
   versionId: z.string().optional(),
-  versionStage: z.string().optional()
+  versionStage: z.string().optional(),
+  ttl: z.number().int().min(-1).default(3600)
 })
 
 export const getSecretValue: Getter = async (params: GetterParams) => {
-  const { secretId: id, versionId, versionStage } = validate(getSecretValueSchema, params)
+  const { secretId: id, versionId, versionStage, ttl } = validate(getSecretValueSchema, params)
   logger.debug(`Retrieving SM Secret ${id}`)
 
   return cache.getOrRetrieve({
     service: 'sm',
     key: id,
+    ttl,
     getter: () => client.send(new GetSecretValueCommand({
       SecretId: id,
       VersionId: versionId,
