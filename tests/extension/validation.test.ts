@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import z from 'zod'
 
-import { stringBooleanSchema, validate } from '#lib/extension/validation.js'
+import { stringBooleanSchema, stringIntegerSchema, validate } from '#lib/extension/validation.js'
 
 describe('Validation helper', () => {
   describe('stringBooleanSchema', () => {
@@ -19,6 +19,20 @@ describe('Validation helper', () => {
 
     it('should reject bad input', () => {
       const output = stringBooleanSchema.safeParse('banana').error
+
+      expect(output).toBeDefined()
+    })
+  })
+
+  describe('stringIntegerSchema', () => {
+    it('should parse stringified number', () => {
+      const output = stringIntegerSchema.safeParse('10').data
+
+      expect(output).toEqual(10)
+    })
+
+    it('should reject bad input', () => {
+      const output = stringIntegerSchema.safeParse('banana').error
 
       expect(output).toBeDefined()
     })
