@@ -20,7 +20,7 @@ const getSecretValueSchema = z.object({
   secretId: z.string(),
   versionId: z.string().optional(),
   versionStage: z.string().optional(),
-  ttl: z.number().int().min(-1).default(3600)
+  ttl: z.number().int().min(-1).default(variables.SM_TTL)
 })
 
 export const getSecretValue: Getter = async (params: GetterParams) => {

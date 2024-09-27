@@ -3,7 +3,7 @@ import { tap } from 'rambda'
 import z from 'zod'
 
 import { logger } from './logging.js'
-import { Getter, GetterParams, KoaContext, KoaNext } from './koa.js'
+import { Getter, GetterParams } from './koa.js'
 import { cache } from './cache.js'
 import { variables } from './env.js'
 import { stringBooleanSchema, validate } from './validation.js'
@@ -20,7 +20,7 @@ const client = new SSMClient({
 const getParameterSchema = z.object({
   parameterName: z.string(),
   withDecryption: stringBooleanSchema,
-  ttl: z.number().int().min(-1).default(3600)
+  ttl: z.number().int().min(-1).default(variables.SSM_TTL)
 })
 
 type A = z.output<typeof getParameterSchema>
@@ -46,7 +46,7 @@ const getParametersSchema = z.object({
     z.array(z.string()).min(1)
   ),
   withDecryption: stringBooleanSchema,
-  ttl: z.number().int().min(-1).default(3600)
+  ttl: z.number().int().min(-1).default(variables.SSM_TTL)
 })
 
 export const getParameters: Getter = async (params: GetterParams) => {
