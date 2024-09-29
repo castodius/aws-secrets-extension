@@ -1,12 +1,3 @@
-# Welcome to your CDK TypeScript Construct Library project
+# Introduction
 
-You should explore the contents of this project. It demonstrates a CDK Construct Library that includes a construct (`AwsSecretsExtension`)
-which contains an Amazon SQS queue that is subscribed to an Amazon SNS topic.
-
-The construct defines an interface (`AwsSecretsExtensionProps`) to configure the visibility timeout of the queue.
-
-## Useful commands
-
-* `npm run build`   compile typescript to js
-* `npm run watch`   watch for changes and compile
-* `npm run test`    perform the jest unit tests
+Work in progress on an open source alternative to [the AWS Parameter and Secrets Lambda extension](https://docs.aws.amazon.com/secretsmanager/latest/userguide/retrieving-secrets_lambda.html).
