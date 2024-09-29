@@ -25,7 +25,7 @@ const getParameterSchema = z.object({
   parameterName: z.string(),
   withDecryption: stringBooleanSchema,
   ttl: stringIntegerSchema.min(-1).default(variables.SSM_TTL),
-  region: z.string().default(process.env.AWS_REGION!)
+  region: z.string().optional()
 })
 
 export const getParameter: Getter = async (params: GetterParams) => {
@@ -51,7 +51,7 @@ const getParametersSchema = z.object({
   ),
   withDecryption: stringBooleanSchema,
   ttl: stringIntegerSchema.min(-1).default(variables.SSM_TTL),
-  region: z.string().default(process.env.AWS_REGION!)
+  region: z.string().optional()
 })
 
 export const getParameters: Getter = async (params: GetterParams) => {

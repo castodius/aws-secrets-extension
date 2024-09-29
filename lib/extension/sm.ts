@@ -24,7 +24,7 @@ const getSecretValueSchema = z.object({
   versionId: z.string().optional(),
   versionStage: z.string().optional(),
   ttl: stringIntegerSchema.min(-1).default(variables.SM_TTL),
-  region: z.string().default(process.env.AWS_REGION!),
+  region: z.string().optional()
 })
 
 export const getSecretValue: Getter = async (params: GetterParams) => {

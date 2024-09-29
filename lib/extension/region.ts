@@ -1,6 +1,6 @@
 import { logger } from "./logging.js"
 
-export const getRegion = (id: string, region: string): string => {
+export const getRegion = (id: string, region?: string): string => {
   const arnRegion = id.match(/^arn:aws:[a-z]+:([a-z0-9-]+):/)
   if (arnRegion) {
     if(region){
@@ -9,5 +9,5 @@ export const getRegion = (id: string, region: string): string => {
     return arnRegion[1]
   }
 
-  return region
+  return region ?? process.env.AWS_REGION!
 }
