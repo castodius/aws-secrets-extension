@@ -7,8 +7,12 @@ import { Getter, GetterParams } from './koa.js'
 import { cache } from './cache.js'
 import { variables } from './env.js'
 import { stringBooleanSchema, stringIntegerSchema, validate } from './validation.js'
+import { getRegion } from './region.js'
+import { BadRequestError } from './errors.js'
 
-const client = new SSMClient({
+const clients: Record<string, SSMClient> = {}
+const getClient = (region: string) => clients[region] ??= new SSMClient({
+  region,
   requestHandler: {
     requestTimeout: variables.SSM_TIMEOUT,
     httpsAgent: {
@@ -20,20 +24,20 @@ const client = new SSMClient({
 const getParameterSchema = z.object({
   parameterName: z.string(),
   withDecryption: stringBooleanSchema,
-  ttl: stringIntegerSchema.min(-1).default(variables.SSM_TTL)
+  ttl: stringIntegerSchema.min(-1).default(variables.SSM_TTL),
+  region: z.string().optional()
 })
 
-type A = z.output<typeof getParameterSchema>
-
 export const getParameter: Getter = async (params: GetterParams) => {
-  const { parameterName: name, withDecryption, ttl } = validate(getParameterSchema, params)
+  const { parameterName: name, withDecryption, ttl, region: regionParameter } = validate(getParameterSchema, params)
+  const region = getRegion(name, regionParameter)
   logger.debug(`Retrieving SSM Parameter ${name} using withDecryption set to ${withDecryption}`)
 
   return cache.getOrRetrieve({
     service: 'ssm',
     key: name,
     ttl,
-    getter: () => client.send(new GetParameterCommand({
+    getter: () => getClient(region).send(new GetParameterCommand({
       Name: name,
       WithDecryption: withDecryption
     }))
@@ -46,15 +50,21 @@ const getParametersSchema = z.object({
     z.array(z.string()).min(1)
   ),
   withDecryption: stringBooleanSchema,
-  ttl: stringIntegerSchema.min(-1).default(variables.SSM_TTL)
+  ttl: stringIntegerSchema.min(-1).default(variables.SSM_TTL),
+  region: z.string().optional()
 })
 
 export const getParameters: Getter = async (params: GetterParams) => {
-  const { names, withDecryption, ttl } = validate(getParametersSchema, params)
+  const { names, withDecryption, ttl, region } = validate(getParametersSchema, params)
 
   const values = unpackNames(names)
   logger.debug(`Retrieving SSM Parameters ${values.join(', ')}`)
   values.sort()
+
+  const regions = values.map(value => getRegion(value, region))
+  if (new Set(regions).size !== 1) {
+    throw new BadRequestError('Values from multiple regions requested. Only one region per request is supported.')
+  }
 
   const key = values.join(',')
   logger.debug(`Cache key "${key}"`)
@@ -63,7 +73,7 @@ export const getParameters: Getter = async (params: GetterParams) => {
     service: 'ssm',
     key,
     ttl,
-    getter: () => client.send(new GetParametersCommand({
+    getter: () => getClient(regions[0]).send(new GetParametersCommand({
       Names: values,
       WithDecryption: withDecryption
     }))

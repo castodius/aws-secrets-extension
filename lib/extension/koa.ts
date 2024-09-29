@@ -3,6 +3,7 @@ import Router from '@koa/router'
 
 import { HttpError } from './errors.js'
 import { CachedItem } from './cache.js'
+import { logger } from './logging.js'
 
 export type KoaContext = Koa.ParameterizedContext<Koa.DefaultState, Koa.DefaultContext & Router.RouterParamContext<Koa.DefaultState, Koa.DefaultContext>, unknown>
 export type KoaNext = Koa.Next
@@ -30,6 +31,7 @@ export const wrapGetter = (getter: Getter) => async (ctx: KoaContext, next: KoaN
         ctx.body = err.message
         ctx.status = err.status
       } else {
+        logger.error(JSON.stringify(err))
         ctx.body = 'Something went wrong'
         ctx.status = 418
       }
