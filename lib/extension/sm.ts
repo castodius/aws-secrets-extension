@@ -12,7 +12,7 @@ const clients: Record<string, SecretsManagerClient> = {}
 const getClient = (region: string) => clients[region] ??= new SecretsManagerClient({
   region,
   requestHandler: {
-    requestTimeout: variables.SSM_TIMEOUT,
+    requestTimeout: variables.SM_TIMEOUT,
     httpsAgent: {
       maxSockets: variables.MAX_CONNECTIONS
     }
