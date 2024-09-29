@@ -11,6 +11,7 @@ export default defineConfig({
         'lib/extension/cache.ts',
         'lib/extension/errors.ts',
         'lib/extension/validation.ts',
+        'lib/extension/region.ts',
       ],
       thresholds: {
         branches: 100,
