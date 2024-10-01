@@ -7,7 +7,7 @@ export const stringBooleanSchema = z.enum(["true", "false"])
 
 export const stringIntegerSchema = z.coerce.number().int()
 
-export const getBaseParameters = (defaultTtl: number) => z.object({
+export const getBaseParametersSchema = (defaultTtl: number) => z.object({
   cacheKey: z.string().optional(),
   region: z.string().optional(),
   ttl: stringIntegerSchema.min(-1).default(defaultTtl)

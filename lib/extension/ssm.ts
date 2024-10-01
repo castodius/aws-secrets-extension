@@ -6,7 +6,7 @@ import { logger } from './logging.js'
 import { Getter, GetterParams } from './koa.js'
 import { Cache, cache } from './cache.js'
 import { variables } from './env.js'
-import { stringBooleanSchema, validate, getBaseParameters } from './validation.js'
+import { stringBooleanSchema, validate, getBaseParametersSchema } from './validation.js'
 import { getRegion } from './region.js'
 import { BadRequestError } from './errors.js'
 
@@ -21,7 +21,7 @@ const getClient = (region: string) => clients[region] ??= new SSMClient({
   }
 })
 
-const getParameterSchema = getBaseParameters(variables.SSM_TTL).extend({
+const getParameterSchema = getBaseParametersSchema(variables.SSM_TTL).extend({
   parameterName: z.string(),
   withDecryption: stringBooleanSchema,
 })
@@ -48,7 +48,7 @@ export const getParameter: Getter = async (params: GetterParams) => {
   })
 }
 
-const getParametersSchema = getBaseParameters(variables.SSM_TTL).extend({
+const getParametersSchema = getBaseParametersSchema(variables.SSM_TTL).extend({
   names: z.string().min(1).or(
     z.array(z.string()).min(1)
   ),

@@ -5,7 +5,7 @@ import { Getter, GetterParams } from "./koa.js";
 import { logger } from "./logging.js";
 import { Cache, cache } from "./cache.js";
 import { variables } from "./env.js";
-import { getBaseParameters, validate } from "./validation.js";
+import { getBaseParametersSchema, validate } from "./validation.js";
 import { getRegion } from "./region.js";
 
 const clients: Record<string, SecretsManagerClient> = {}
@@ -19,7 +19,7 @@ const getClient = (region: string) => clients[region] ??= new SecretsManagerClie
   }
 })
 
-const getSecretValueSchema = getBaseParameters(variables.SM_TTL).extend({
+const getSecretValueSchema = getBaseParametersSchema(variables.SM_TTL).extend({
   secretId: z.string(),
   versionId: z.string().optional(),
   versionStage: z.string().optional().default('AWSCURRENT'),
