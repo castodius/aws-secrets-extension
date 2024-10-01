@@ -4,9 +4,9 @@ import z from 'zod'
 
 import { logger } from './logging.js'
 import { Getter, GetterParams } from './koa.js'
-import { cache } from './cache.js'
+import { Cache, cache } from './cache.js'
 import { variables } from './env.js'
-import { stringBooleanSchema, stringIntegerSchema, validate } from './validation.js'
+import { stringBooleanSchema, validate, getBaseParametersSchema } from './validation.js'
 import { getRegion } from './region.js'
 import { BadRequestError } from './errors.js'
 
@@ -21,21 +21,24 @@ const getClient = (region: string) => clients[region] ??= new SSMClient({
   }
 })
 
-const getParameterSchema = z.object({
+const getParameterSchema = getBaseParametersSchema(variables.SSM_TTL).extend({
   parameterName: z.string(),
   withDecryption: stringBooleanSchema,
-  ttl: stringIntegerSchema.min(-1).default(variables.SSM_TTL),
-  region: z.string().optional()
 })
 
 export const getParameter: Getter = async (params: GetterParams) => {
-  const { parameterName: name, withDecryption, ttl, region: regionParameter } = validate(getParameterSchema, params)
+  const { parameterName: name, withDecryption, ttl, region: regionParameter, cacheKey } = validate(getParameterSchema, params)
   const region = getRegion(name, regionParameter)
+  const key = cacheKey ?? Cache.createCacheKey({
+    name,
+    withDecryption,
+    region
+  })
   logger.debug(`Retrieving SSM Parameter ${name} using withDecryption set to ${withDecryption}`)
 
   return cache.getOrRetrieve({
     service: 'ssm',
-    key: name,
+    key,
     ttl,
     getter: () => getClient(region).send(new GetParameterCommand({
       Name: name,
@@ -45,39 +48,40 @@ export const getParameter: Getter = async (params: GetterParams) => {
   })
 }
 
-const getParametersSchema = z.object({
+const getParametersSchema = getBaseParametersSchema(variables.SSM_TTL).extend({
   names: z.string().min(1).or(
     z.array(z.string()).min(1)
   ),
   withDecryption: stringBooleanSchema,
-  ttl: stringIntegerSchema.min(-1).default(variables.SSM_TTL),
-  region: z.string().optional()
 })
 
 export const getParameters: Getter = async (params: GetterParams) => {
-  const { names, withDecryption, ttl, region } = validate(getParametersSchema, params)
+  const { names: namesParameter, withDecryption, ttl, region: regionParameter, cacheKey } = validate(getParametersSchema, params)
+  const names = unpackNames(namesParameter)
+  names.sort()
 
-  const values = unpackNames(names)
-  logger.debug(`Retrieving SSM Parameters ${values.join(', ')}`)
-  values.sort()
-
-  const regions = values.map(value => getRegion(value, region))
+  const regions = names.map(value => getRegion(value, regionParameter))
   if (new Set(regions).size !== 1) {
     throw new BadRequestError('Values from multiple regions requested. Only one region per request is supported.')
   }
+  const region = regions[0]
 
-  const key = values.join(',')
-  logger.debug(`Cache key "${key}"`)
+  const key = cacheKey ?? Cache.createCacheKey({
+    names,
+    withDecryption,
+    region
+  })
+  logger.debug(`Retrieving SSM Parameters ${names.join(', ')}`)
 
   return cache.getOrRetrieve({
     service: 'ssm',
     key,
     ttl,
-    getter: () => getClient(regions[0]).send(new GetParametersCommand({
-      Names: values,
+    getter: () => getClient(region).send(new GetParametersCommand({
+      Names: names,
       WithDecryption: withDecryption
     }))
-      .then(tap(cacheIndividualValues(key, ttl)))
+      .then(tap(cacheIndividualValues(withDecryption, region, ttl)))
       .then(JSON.stringify)
   })
 }
@@ -89,8 +93,8 @@ const unpackNames = (names: z.infer<typeof getParametersSchema>['names']): strin
   return names.split(',')
 }
 
-const cacheIndividualValues = (key: string, ttl: number) => (result: GetParametersCommandOutput) => {
-  logger.debug(`Caching individual values of SSM GetParameters request for names ${key}`)
+const cacheIndividualValues = (withDecryption: boolean, region: string, ttl: number) => (result: GetParametersCommandOutput) => {
+  logger.debug('Caching individual values of SSM GetParameters request')
   for (const parameter of result.Parameters!) {
     const arn = parameter.ARN!
     const name = parameter.Name!
@@ -98,13 +102,21 @@ const cacheIndividualValues = (key: string, ttl: number) => (result: GetParamete
 
     cache.add({
       service: 'ssm',
-      key: arn,
+      key: Cache.createCacheKey({
+        arn,
+        withDecryption,
+        region
+      }),
       item,
       ttl
     })
     cache.add({
       service: 'ssm',
-      key: name,
+      key: Cache.createCacheKey({
+        name,
+        withDecryption,
+        region
+      }),
       item,
       ttl
     })

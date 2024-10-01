@@ -236,4 +236,39 @@ describe('Cache', () => {
       })
     })
   })
+
+  describe('createCacheKey', () => {
+    it('should include all keys', () => {
+      const output = Cache.createCacheKey({
+        a: 47,
+        b: 'hello'
+      })
+
+      expect(output).toEqual('{"a":47,"b":"hello"}')
+    })
+
+    it('should sort keys', () => {
+      const output = Cache.createCacheKey({
+        b: 'hello',
+        a: 47
+      })
+
+      expect(output).toEqual('{"a":47,"b":"hello"}')
+    })
+
+    it('should sort deep keys', () => {
+      const output = Cache.createCacheKey({
+        d: {
+          e: 1,
+          f: 4
+        },
+        a: {
+          c: 2,
+          d: 3
+        }
+      })
+
+      expect(output).toEqual('{"a":{"c":2,"d":3},"d":{"e":1,"f":4}}')
+    })
+  })
 })

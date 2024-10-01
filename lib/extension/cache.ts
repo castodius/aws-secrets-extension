@@ -91,7 +91,7 @@ export class Cache {
 
     logger.debug(`Item found for ${key} for ${service}`)
 
-    if(item.expiresAt === INFINITE_TTL){
+    if (item.expiresAt === INFINITE_TTL) {
       logger.debug('Item has infinite TTL')
       return item
     }
@@ -137,6 +137,22 @@ export class Cache {
       this.#cache[service] = {}
     }
     return this.#cache[service]
+  }
+
+  private static sortObjectKeys(obj: object): object {
+    if (!obj || typeof obj !== 'object') {
+      return obj
+    }
+
+    return Object.fromEntries(
+      Object.entries(obj)
+        .map(([key, value]) => ([key, this.sortObjectKeys(value)] as [string, object]))
+        .toSorted(([a], [b]) => a.localeCompare(b))
+    )
+  }
+
+  public static createCacheKey(obj: object): string {
+    return JSON.stringify(this.sortObjectKeys(obj))
   }
 }
 
