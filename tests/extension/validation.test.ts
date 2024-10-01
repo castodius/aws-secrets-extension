@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import z from 'zod'
 
-import { stringBooleanSchema, stringIntegerSchema, validate } from '#lib/extension/validation.js'
+import { getBaseParametersSchema, stringBooleanSchema, stringIntegerSchema, validate } from '#lib/extension/validation.js'
 
 describe('Validation helper', () => {
   describe('stringBooleanSchema', () => {
@@ -35,6 +35,22 @@ describe('Validation helper', () => {
       const output = stringIntegerSchema.safeParse('banana').error
 
       expect(output).toBeDefined()
+    })
+  })
+
+  describe('getBaseParametersSchema', () => {
+    it('should return a schema', () => {
+      const output = validate(getBaseParametersSchema(5), {
+        cacheKey: 'ck',
+        region: 'r',
+        ttl: 7
+      })
+
+      expect(output).toEqual({
+        cacheKey: 'ck',
+        region: 'r',
+        ttl: 7
+      })
     })
   })
 
