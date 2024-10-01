@@ -6,7 +6,7 @@ import { logger } from './logging.js'
 import { Getter, GetterParams } from './koa.js'
 import { Cache, cache } from './cache.js'
 import { variables } from './env.js'
-import { stringBooleanSchema, stringIntegerSchema, validate } from './validation.js'
+import { stringBooleanSchema, validate, getBaseParameters } from './validation.js'
 import { getRegion } from './region.js'
 import { BadRequestError } from './errors.js'
 
@@ -21,17 +21,15 @@ const getClient = (region: string) => clients[region] ??= new SSMClient({
   }
 })
 
-const getParameterSchema = z.object({
+const getParameterSchema = getBaseParameters(variables.SSM_TTL).extend({
   parameterName: z.string(),
   withDecryption: stringBooleanSchema,
-  ttl: stringIntegerSchema.min(-1).default(variables.SSM_TTL),
-  region: z.string().optional()
 })
 
 export const getParameter: Getter = async (params: GetterParams) => {
-  const { parameterName: name, withDecryption, ttl, region: regionParameter } = validate(getParameterSchema, params)
+  const { parameterName: name, withDecryption, ttl, region: regionParameter, cacheKey } = validate(getParameterSchema, params)
   const region = getRegion(name, regionParameter)
-  const key = Cache.createCacheKey({
+  const key = cacheKey ?? Cache.createCacheKey({
     name,
     withDecryption,
     region
@@ -50,17 +48,15 @@ export const getParameter: Getter = async (params: GetterParams) => {
   })
 }
 
-const getParametersSchema = z.object({
+const getParametersSchema = getBaseParameters(variables.SSM_TTL).extend({
   names: z.string().min(1).or(
     z.array(z.string()).min(1)
   ),
   withDecryption: stringBooleanSchema,
-  ttl: stringIntegerSchema.min(-1).default(variables.SSM_TTL),
-  region: z.string().optional()
 })
 
 export const getParameters: Getter = async (params: GetterParams) => {
-  const { names: namesParameter, withDecryption, ttl, region: regionParameter } = validate(getParametersSchema, params)
+  const { names: namesParameter, withDecryption, ttl, region: regionParameter, cacheKey } = validate(getParametersSchema, params)
   const names = unpackNames(namesParameter)
   names.sort()
 
@@ -70,7 +66,7 @@ export const getParameters: Getter = async (params: GetterParams) => {
   }
   const region = regions[0]
 
-  const key = Cache.createCacheKey({
+  const key = cacheKey ?? Cache.createCacheKey({
     names,
     withDecryption,
     region
