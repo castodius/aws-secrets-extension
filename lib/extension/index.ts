@@ -1,26 +1,26 @@
-import { variables } from "./env.js";
-import { next, register } from "./extensionsApi.js";
-import { logger } from './logging.js';
+import { variables } from "./env.js"
+import { next, register } from "./extensionsApi.js"
+import { logger } from './logging.js'
 import './server.js'
-import { getSecretValue } from "./sm.js";
-import { getParameter, getParameters } from "./ssm.js";
+import { getSecretValue } from "./sm.js"
+import { getParameter, getParameters } from "./ssm.js"
 
 const main = async () => {
   logger.info({
     message: 'Parsed variables',
-    variables
+    variables,
   })
   logger.debug('Registering extension')
-  const extensionId = await register();
+  const extensionId = await register()
   logger.debug({
-    extensionId
+    extensionId,
   })
 
   if (variables.PREFETCH_SSM_GET_PARAMETERS.length) {
     logger.info('Prefetching SSM parameters using GetParameters request')
     await getParameters({
       names: variables.PREFETCH_SSM_GET_PARAMETERS,
-      withDecryption: 'true'
+      withDecryption: 'true',
     })
   }
 
@@ -28,7 +28,7 @@ const main = async () => {
     logger.info('Prefetching SSM parameters using individual GetParameter requests')
     await Promise.all(
       variables.PREFETCH_SSM_GET_PARAMETER
-        .map((parameterName) => getParameter({ parameterName, withDecryption: 'true' }))
+        .map((parameterName) => getParameter({ parameterName, withDecryption: 'true', }))
     )
   }
 
@@ -36,7 +36,7 @@ const main = async () => {
     logger.info('Prefetching Secrets Manager secret values')
     await Promise.all(
       variables.PREFETCH_SM_GET_SECRET_VALUE
-        .map((secretId) => getSecretValue({ secretId }))
+        .map((secretId) => getSecretValue({ secretId, }))
     )
   }
 

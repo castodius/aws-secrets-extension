@@ -16,7 +16,7 @@ describe('Cache', () => {
         key: 'k',
         service: 's',
         item: 'wow',
-        ttl: 10
+        ttl: 10,
       })
 
       expect(output).toEqual({
@@ -36,7 +36,7 @@ describe('Cache', () => {
         key: 'k',
         service: 's',
         item: 'wow',
-        ttl: INFINITE_TTL
+        ttl: INFINITE_TTL,
       })
 
       expect(output).toEqual({
@@ -56,7 +56,7 @@ describe('Cache', () => {
         key: 'k',
         service: 's',
         item: 'wow',
-        ttl: 10
+        ttl: 10,
       })
 
       expect(output).toEqual({
@@ -76,7 +76,7 @@ describe('Cache', () => {
         key: 'k',
         service: 's',
         item: 'wow',
-        ttl: 10
+        ttl: 10,
       })
 
       expect(output).toEqual({
@@ -96,7 +96,7 @@ describe('Cache', () => {
         key: 'k',
         service: 's',
         item: 'wow',
-        ttl: 0
+        ttl: 0,
       })
 
       expect(output).toEqual({
@@ -118,11 +118,11 @@ describe('Cache', () => {
         key: 'k',
         service: 's',
         item: 'wow',
-        ttl: 10
+        ttl: 10,
       })
       const output = cache.get({
         key: 'k',
-        service: 's'
+        service: 's',
       })
 
       expect(output).toEqual({
@@ -140,14 +140,14 @@ describe('Cache', () => {
         key: 'k',
         service: 's',
         item: 'wow',
-        ttl: INFINITE_TTL
+        ttl: INFINITE_TTL,
       })
       const date = new Date(3024, 8, 26, 19)
       vi.setSystemTime(date)
 
       const output = cache.get({
         key: 'k',
-        service: 's'
+        service: 's',
       })
 
       expect(output).toEqual({
@@ -164,7 +164,7 @@ describe('Cache', () => {
 
       const output = cache.get({
         key: 'k',
-        service: 's'
+        service: 's',
       })
 
       expect(output).toEqual(undefined)
@@ -176,7 +176,7 @@ describe('Cache', () => {
         key: 'k',
         service: 's',
         item: 'wow',
-        ttl: 10
+        ttl: 10,
       })
       // one hour later
       const date = new Date(1727373600000)
@@ -184,7 +184,7 @@ describe('Cache', () => {
 
       const output = cache.get({
         key: 'k',
-        service: 's'
+        service: 's',
       })
 
       expect(output).toEqual(undefined)
@@ -199,7 +199,7 @@ describe('Cache', () => {
         key: 'k',
         service: 's',
         getter: () => Promise.resolve('wow'),
-        ttl: 10
+        ttl: 10,
       })
 
       expect(output).toEqual({
@@ -218,13 +218,13 @@ describe('Cache', () => {
         key: 'k',
         service: 's',
         item: 'wow',
-        ttl: 10
+        ttl: 10,
       })
       const output = await cache.getOrRetrieve({
         key: 'k',
         service: 's',
         getter: () => Promise.resolve('wow'),
-        ttl: 10
+        ttl: 10,
       })
 
       expect(output).toEqual({
@@ -241,7 +241,7 @@ describe('Cache', () => {
     it('should include all keys', () => {
       const output = Cache.createCacheKey({
         a: 47,
-        b: 'hello'
+        b: 'hello',
       })
 
       expect(output).toEqual('{"a":47,"b":"hello"}')
@@ -250,7 +250,7 @@ describe('Cache', () => {
     it('should sort keys', () => {
       const output = Cache.createCacheKey({
         b: 'hello',
-        a: 47
+        a: 47,
       })
 
       expect(output).toEqual('{"a":47,"b":"hello"}')
@@ -260,12 +260,12 @@ describe('Cache', () => {
       const output = Cache.createCacheKey({
         d: {
           e: 1,
-          f: 4
+          f: 4,
         },
         a: {
           c: 2,
-          d: 3
-        }
+          d: 3,
+        },
       })
 
       expect(output).toEqual('{"a":{"c":2,"d":3},"d":{"e":1,"f":4}}')

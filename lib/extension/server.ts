@@ -1,11 +1,11 @@
 import Koa from 'koa'
 import Router from '@koa/router'
 
-import * as ssm from './ssm.js';
-import * as sm from './sm.js';
-import { logger } from './logging.js';
-import { variables } from './env.js';
-import { KoaContext, KoaNext, wrapGetter } from './koa.js';
+import * as ssm from './ssm.js'
+import * as sm from './sm.js'
+import { logger } from './logging.js'
+import { variables } from './env.js'
+import { KoaContext, KoaNext, wrapGetter } from './koa.js'
 
 const getParameter = wrapGetter(ssm.getParameter)
 const getParameters = wrapGetter(ssm.getParameters)
@@ -18,12 +18,12 @@ router.use(async (ctx, next) => {
 
   if (!tokenHeader) {
     logger.error('Token header missing in request')
-    ctx.throw(401, JSON.stringify({ message: 'Missing auth header "X-Secrets-Extension-Token"' }))
+    ctx.throw(401, JSON.stringify({ message: 'Missing auth header "X-Secrets-Extension-Token"', }))
   }
 
   if (tokenHeader !== process.env.AWS_SESSION_TOKEN) {
     logger.error('Token header does not have same value as AWS_SESSION_TOKEN')
-    ctx.throw(401, JSON.stringify({ message: 'Supplied auth header has incorrect value' }))
+    ctx.throw(401, JSON.stringify({ message: 'Supplied auth header has incorrect value', }))
   }
 
   await next()
@@ -48,7 +48,7 @@ app
     if(ctx.status === 404){
       ctx.status = 404
       ctx.body = JSON.stringify({
-        message: 'No such resource, please review documentation for available resources'
+        message: 'No such resource, please review documentation for available resources',
       })
     }
     return next()

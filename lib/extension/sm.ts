@@ -1,12 +1,12 @@
-import { GetSecretValueCommand, SecretsManagerClient } from "@aws-sdk/client-secrets-manager";
+import { GetSecretValueCommand, SecretsManagerClient } from "@aws-sdk/client-secrets-manager"
 import z from 'zod'
 
-import { Getter, GetterParams } from "./koa.js";
-import { logger } from "./logging.js";
-import { Cache, cache } from "./cache.js";
-import { variables } from "./env.js";
-import { getBaseParametersSchema, validate } from "./validation.js";
-import { getRegion } from "./region.js";
+import { Getter, GetterParams } from "./koa.js"
+import { logger } from "./logging.js"
+import { Cache, cache } from "./cache.js"
+import { variables } from "./env.js"
+import { getBaseParametersSchema, validate } from "./validation.js"
+import { getRegion } from "./region.js"
 
 const clients: Record<string, SecretsManagerClient> = {}
 const getClient = (region: string) => clients[region] ??= new SecretsManagerClient({
@@ -14,9 +14,9 @@ const getClient = (region: string) => clients[region] ??= new SecretsManagerClie
   requestHandler: {
     requestTimeout: variables.SM_TIMEOUT,
     httpsAgent: {
-      maxSockets: variables.MAX_CONNECTIONS
-    }
-  }
+      maxSockets: variables.MAX_CONNECTIONS,
+    },
+  },
 })
 
 const getSecretValueSchema = getBaseParametersSchema(variables.SM_TTL).extend({
@@ -26,13 +26,13 @@ const getSecretValueSchema = getBaseParametersSchema(variables.SM_TTL).extend({
 })
 
 export const getSecretValue: Getter = async (params: GetterParams) => {
-  const { secretId, versionId, versionStage, ttl, region: regionParameter, cacheKey } = validate(getSecretValueSchema, params)
+  const { secretId, versionId, versionStage, ttl, region: regionParameter, cacheKey, } = validate(getSecretValueSchema, params)
   const region = getRegion(secretId, regionParameter)
   const key = cacheKey ?? Cache.createCacheKey({
     secretId,
     versionId,
     versionStage,
-    region
+    region,
   })
   logger.debug(`Retrieving SM Secret ${secretId}`)
 
@@ -43,8 +43,8 @@ export const getSecretValue: Getter = async (params: GetterParams) => {
     getter: () => getClient(region).send(new GetSecretValueCommand({
       SecretId: secretId,
       VersionId: versionId,
-      VersionStage: versionStage
+      VersionStage: versionStage,
     }))
-      .then((response) => JSON.stringify(response))
+      .then((response) => JSON.stringify(response)),
   })
 }

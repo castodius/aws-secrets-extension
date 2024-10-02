@@ -15,7 +15,7 @@ export type Getter = (params: GetterParams) => Promise<CachedItem>
 export const wrapGetter = (getter: Getter) => async (ctx: KoaContext, next: KoaNext) => {
   return getter({
     ...ctx.query,
-    ...ctx.params
+    ...ctx.params,
   })
     .then((response) => {
       ctx.body = response.item as string

@@ -39,7 +39,7 @@ export class Cache {
   }
 
   public add(params: AddParams): CachedItem {
-    const { service, key, item, ttl } = params
+    const { service, key, item, ttl, } = params
 
     const hasSpace = this.#itemCount < this.#maxItems
 
@@ -56,7 +56,7 @@ export class Cache {
         item,
         expiresAt: 0,
         addedAt: 0,
-        cached: false
+        cached: false,
       }
     }
 
@@ -67,7 +67,7 @@ export class Cache {
       item,
       expiresAt: INFINITE_TTL === ttl ? ttl : epoch + ttl,
       addedAt: epoch,
-      cached: true
+      cached: true,
     }
     logger.debug({
       message: 'Item set to expire at',
@@ -80,7 +80,7 @@ export class Cache {
   }
 
   public get(params: GetParams): CachedItem | undefined {
-    const { service, key } = params
+    const { service, key, } = params
     logger.debug(`Getting ${key} for ${service}`)
 
     const item = this.getServiceCache(service)[key]
@@ -116,7 +116,7 @@ export class Cache {
   }
 
   private async retrieveAndAdd(params: RetrieveParams): Promise<CachedItem> {
-    const { service, key, getter, ttl } = params
+    const { service, key, getter, ttl, } = params
 
     logger.debug(`Retrieving ${key} for ${service} from AWS`)
     return getter()
@@ -127,7 +127,7 @@ export class Cache {
           service,
           key,
           item,
-          ttl
+          ttl,
         })
       })
   }
