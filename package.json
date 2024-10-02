@@ -10,11 +10,13 @@
   },
   "packageManager": "yarn@4.4.1",
   "scripts": {
+    "postinstall": "",
     "build": "tsc",
     "test": "vitest run --coverage",
     "test-watch": "vitest --coverage",
     "lint": "eslint",
-    "lint-fix": "eslint --fix"
+    "lint-fix": "eslint --fix",
+    "prepare": "husky"
   },
   "imports": {
     "#lib/*": "./lib/*"
@@ -29,6 +31,7 @@
     "constructs": "^10.0.0",
     "eslint": "^9.11.1",
     "globals": "^15.10.0",
+    "husky": "^9.1.6",
     "rambda": "^9.3.0",
     "typescript": "~5.5.3",
     "typescript-eslint": "^8.8.0",
