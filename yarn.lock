@@ -3299,6 +3299,7 @@ __metadata:
     esbuild: "npm:^0.23.1"
     eslint: "npm:^9.11.1"
     globals: "npm:^15.10.0"
+    husky: "npm:^9.1.6"
     koa: "npm:^2.15.3"
     rambda: "npm:^9.3.0"
     typescript: "npm:~5.5.3"
@@ -4411,6 +4412,15 @@ __metadata:
   version: 5.0.0
   resolution: "human-signals@npm:5.0.0"
   checksum: 10/30f8870d831cdcd2d6ec0486a7d35d49384996742052cee792854273fa9dd9e7d5db06bb7985d4953e337e10714e994e0302e90dc6848069171b05ec836d65b0
+  languageName: node
+  linkType: hard
+
+"husky@npm:^9.1.6":
+  version: 9.1.6
+  resolution: "husky@npm:9.1.6"
+  bin:
+    husky: bin.js
+  checksum: 10/421ccd8850378231aaefd70dbe9e4f1549b84ffe3a6897f93a202242bbc04e48bd498169aef43849411105d9fcf7c192b757d42661e28d06b934a609a4eb8771
   languageName: node
   linkType: hard
 
