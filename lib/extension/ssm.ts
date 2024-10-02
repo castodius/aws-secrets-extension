@@ -1,4 +1,4 @@
-import { GetParameterCommand, GetParametersCommand, GetParametersCommandOutput, SSMClient, } from '@aws-sdk/client-ssm'
+import { GetParameterCommand, GetParametersCommand, GetParametersCommandOutput, SSMClient } from '@aws-sdk/client-ssm'
 import { tap } from 'rambda'
 import z from 'zod'
 
@@ -16,9 +16,9 @@ const getClient = (region: string) => clients[region] ??= new SSMClient({
   requestHandler: {
     requestTimeout: variables.SSM_TIMEOUT,
     httpsAgent: {
-      maxSockets: variables.MAX_CONNECTIONS
-    }
-  }
+      maxSockets: variables.MAX_CONNECTIONS,
+    },
+  },
 })
 
 const getParameterSchema = getBaseParametersSchema(variables.SSM_TTL).extend({
@@ -27,12 +27,12 @@ const getParameterSchema = getBaseParametersSchema(variables.SSM_TTL).extend({
 })
 
 export const getParameter: Getter = async (params: GetterParams) => {
-  const { parameterName: name, withDecryption, ttl, region: regionParameter, cacheKey } = validate(getParameterSchema, params)
+  const { parameterName: name, withDecryption, ttl, region: regionParameter, cacheKey, } = validate(getParameterSchema, params)
   const region = getRegion(name, regionParameter)
   const key = cacheKey ?? Cache.createCacheKey({
     name,
     withDecryption,
-    region
+    region,
   })
   logger.debug(`Retrieving SSM Parameter ${name} using withDecryption set to ${withDecryption}`)
 
@@ -42,9 +42,9 @@ export const getParameter: Getter = async (params: GetterParams) => {
     ttl,
     getter: () => getClient(region).send(new GetParameterCommand({
       Name: name,
-      WithDecryption: withDecryption
+      WithDecryption: withDecryption,
     }))
-      .then(JSON.stringify)
+      .then(JSON.stringify),
   })
 }
 
@@ -56,7 +56,7 @@ const getParametersSchema = getBaseParametersSchema(variables.SSM_TTL).extend({
 })
 
 export const getParameters: Getter = async (params: GetterParams) => {
-  const { names: namesParameter, withDecryption, ttl, region: regionParameter, cacheKey } = validate(getParametersSchema, params)
+  const { names: namesParameter, withDecryption, ttl, region: regionParameter, cacheKey, } = validate(getParametersSchema, params)
   const names = unpackNames(namesParameter)
   names.sort()
 
@@ -69,7 +69,7 @@ export const getParameters: Getter = async (params: GetterParams) => {
   const key = cacheKey ?? Cache.createCacheKey({
     names,
     withDecryption,
-    region
+    region,
   })
   logger.debug(`Retrieving SSM Parameters ${names.join(', ')}`)
 
@@ -79,10 +79,10 @@ export const getParameters: Getter = async (params: GetterParams) => {
     ttl,
     getter: () => getClient(region).send(new GetParametersCommand({
       Names: names,
-      WithDecryption: withDecryption
+      WithDecryption: withDecryption,
     }))
       .then(tap(cacheIndividualValues(withDecryption, region, ttl)))
-      .then(JSON.stringify)
+      .then(JSON.stringify),
   })
 }
 
@@ -105,20 +105,20 @@ const cacheIndividualValues = (withDecryption: boolean, region: string, ttl: num
       key: Cache.createCacheKey({
         arn,
         withDecryption,
-        region
+        region,
       }),
       item,
-      ttl
+      ttl,
     })
     cache.add({
       service: 'ssm',
       key: Cache.createCacheKey({
         name,
         withDecryption,
-        region
+        region,
       }),
       item,
-      ttl
+      ttl,
     })
   }
 }

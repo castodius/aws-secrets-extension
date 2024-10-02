@@ -43,13 +43,13 @@ describe('Validation helper', () => {
       const output = validate(getBaseParametersSchema(5), {
         cacheKey: 'ck',
         region: 'r',
-        ttl: 7
+        ttl: 7,
       })
 
       expect(output).toEqual({
         cacheKey: 'ck',
         region: 'r',
-        ttl: 7
+        ttl: 7,
       })
     })
   })
@@ -57,26 +57,26 @@ describe('Validation helper', () => {
   describe('validate', () => {
     it('should parse good input', () => {
       const schema = z.object({
-        a: z.number()
+        a: z.number(),
       })
 
       const output = validate(schema, {
         a: 4711,
-        b: true
+        b: true,
       })
 
       expect(output).toEqual({
-        a: 4711
+        a: 4711,
       })
     })
 
     it('should throw for bad input', () => {
       const schema = z.object({
-        a: z.number()
+        a: z.number(),
       })
 
       expect(() => validate(schema, {
-        b: true
+        b: true,
       })).toThrow()
     })
   })

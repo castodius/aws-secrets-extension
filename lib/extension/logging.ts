@@ -20,11 +20,11 @@ export class Logger {
 
   private format(message: Message, level: LogLevel): string {
     const stringMessage = typeof message === 'string' ? message : JSON.stringify(message)
-    const objectMessage = typeof message === 'string' ? { message } : message
+    const objectMessage = typeof message === 'string' ? { message, } : message
     return this.#format === 'json'
       ? JSON.stringify({
         ...objectMessage,
-        level
+        level,
       })
       : `[${level.toUpperCase()}]: ${stringMessage}`
   }
