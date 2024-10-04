@@ -6,11 +6,11 @@ COPY ./yarn.lock ./
 COPY ./.yarn ./.yarn
 COPY ./.yarnrc.yml ./
 COPY ./package.json ./
-COPY ./tests/inVitro ./tests/inVitro
+COPY ./local ./local
 
 RUN corepack enable
 RUN yarn install --immutable
 
 EXPOSE 3000
 
-CMD [ "yarn", "tsx", "tests/inVitro/localServer.ts"]
+CMD [ "yarn", "tsx", "local/localServer.ts" ]

@@ -5,12 +5,12 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
 describe('Auth', () => {
   beforeAll(async () => {
-    exec('docker compose --file tests/inVitro/compose.yml up')
+    exec('docker compose --file local/compose.yml up')
     await sleep(3000)
   })
 
   afterAll(() => {
-    execSync('docker compose --file tests/inVitro/compose.yml down')
+    execSync('docker compose --file local/compose.yml down')
   })
 
   it('should handle missing auth header', async () => {

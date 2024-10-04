@@ -12,9 +12,9 @@
   "scripts": {
     "postinstall": "husky install",
     "build": "tsc",
-    "build-local-extension": "docker build -f tests/inVitro/Dockerfile.local-extension -t local-extension .",
-    "build-lambda-environment": "docker build -f tests/inVitro/Dockerfile.lambda-environment -t lambda-environment .",
-    "run-local-extension": "docker compose --file tests/inVitro/compose.yml up",
+    "build-local-extension": "docker build -f local/Dockerfile.local-extension -t local-extension .",
+    "build-lambda-environment": "docker build -f local/Dockerfile.lambda-environment -t lambda-environment .",
+    "run-local-extension": "docker compose --file local/compose.yml up",
     "start-local": "npm-run-all build-local-extension build-lambda-environment run-local-extension",
     "test": "vitest run --coverage",
     "test-watch": "vitest --coverage",
