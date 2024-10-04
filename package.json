@@ -16,8 +16,8 @@
     "build-lambda-environment": "docker build -f local/Dockerfile.lambda-environment -t lambda-environment .",
     "run-local-extension": "docker compose --file local/compose.yml up",
     "start-local": "npm-run-all build-local-extension build-lambda-environment run-local-extension",
-    "test": "vitest run --coverage",
-    "test-watch": "vitest --coverage",
+    "test": "vitest run unit --coverage",
+    "test-watch": "vitest unit --coverage",
     "lint": "eslint",
     "lint-fix": "eslint --fix",
     "prepare": "husky"
