@@ -1,0 +1,20 @@
+services:
+  lambda-environment:
+    image: lambda-environment
+    ports:
+      - 3000:3000
+    environment:
+      SERVER_PORT: 3000
+  local-extension:
+    image: local-extension
+    depends_on:
+      - lambda-environment
+    ports:
+      - 2773:2773
+    environment:
+      AWS_PROFILE: ${AWS_PROFILE}
+      AWS_LAMBDA_RUNTIME_API: "host.docker.internal:3000"
+      AWS_SECRETS_EXTENSION_PREFIX: LOCAL_TESTING
+      LOCAL_TESTING_LOG_LEVEL: debug
+    volumes:
+      - ~/.aws/:/root/.aws:ro
