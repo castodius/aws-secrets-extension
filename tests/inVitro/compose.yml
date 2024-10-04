@@ -1,3 +1,6 @@
+name:
+  local-aws-secrets-extension
+
 services:
   lambda-environment:
     image: lambda-environment
