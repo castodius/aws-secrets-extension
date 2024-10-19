@@ -32,6 +32,9 @@ jobs:
 
       - name: Build Docker lambda-environment image
         run: yarn build-lambda-environment
+      
+      - name: Check port
+        run: lsof -i :2773
 
       - name: Start docker
         run: yarn run-local-extension -d
