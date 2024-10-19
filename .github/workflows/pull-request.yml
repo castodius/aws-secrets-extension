@@ -43,7 +43,7 @@ jobs:
         run: curl -X POST http://localhost:3000/2020-01-01/extension/register -I 
 
       - name: Call extension
-        run: curl -X GET http://localhost:3001/nope -I 
+        run: curl -X GET http://localhost:2773/nope -I 
 
       - name: Run integration tests
         run: yarn test-integration

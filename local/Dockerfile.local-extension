@@ -11,6 +11,6 @@ COPY ./lib ./lib
 RUN corepack enable
 RUN yarn install --immutable
 
-EXPOSE 3001
+EXPOSE 2773
 
 CMD [ "yarn", "tsx", "lib/extension/index.ts"]
