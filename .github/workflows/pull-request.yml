@@ -27,5 +27,11 @@ jobs:
       - name: Run unit tests
         run: yarn test-unit
 
+      - name: Build Docker local-extension image
+        run: yarn build-local-extension
+
+      - name: Build Docker lambda-environment image
+        run: yarn build-lambda-environment
+
       - name: Run integration tests
         run: yarn test-integration
