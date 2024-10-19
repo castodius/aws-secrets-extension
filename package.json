@@ -17,7 +17,9 @@
     "run-local-extension": "docker compose --file local/compose.yml up",
     "start-local": "npm-run-all build-local-extension build-lambda-environment run-local-extension",
     "test": "vitest run unit --coverage",
+    "test-unit": "vitest run unit --coverage",
     "test-watch": "vitest unit --coverage",
+    "test-integration": "vitest run integration",
     "lint": "eslint",
     "lint-fix": "eslint --fix",
     "prepare": "husky"

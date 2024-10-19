@@ -6,7 +6,7 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 describe('Auth', () => {
   beforeAll(async () => {
     exec('docker compose --file local/compose.yml up')
-    await sleep(3000)
+    await sleep(10000)
   })
 
   afterAll(() => {
