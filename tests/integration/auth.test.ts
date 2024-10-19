@@ -14,7 +14,7 @@ describe('Auth', () => {
   })
 
   it('should handle missing auth header', async () => {
-    const output = await fetch('http://localhost:2773/ssm/parameters/nope')
+    const output = await fetch('http://localhost:3001/ssm/parameters/nope')
 
     expect(output.status).toEqual(401)
     expect(await output.json()).toEqual({
@@ -25,7 +25,7 @@ describe('Auth', () => {
   it('should handle bad auth header', async () => {
     const headers = new Headers()
     headers.append('X-Secrets-Extension-Token', 'nope')
-    const output = await fetch('http://localhost:2773/ssm/parameters/nope', {
+    const output = await fetch('http://localhost:3001/ssm/parameters/nope', {
       headers,
     })
 
@@ -38,7 +38,7 @@ describe('Auth', () => {
   it('should handle non-existing resources', async () => {
     const headers = new Headers()
     headers.append('X-Secrets-Extension-Token', 'local-testing')
-    const output = await fetch('http://localhost:2773/nope', {
+    const output = await fetch('http://localhost:3001/nope', {
       headers,
     })
 
