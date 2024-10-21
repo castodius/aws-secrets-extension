@@ -13,6 +13,7 @@ const getSecretValue = wrapGetter(sm.getSecretValue)
 
 const router = new Router()
 
+const sessionToken = process.env.AWS_SESSION_TOKEN ?? 'local-testing'
 router.use(async (ctx, next) => {
   const tokenHeader = ctx.headers['x-secrets-extension-token']
 
@@ -21,7 +22,7 @@ router.use(async (ctx, next) => {
     ctx.throw(401, JSON.stringify({ message: 'Missing auth header "X-Secrets-Extension-Token"', }))
   }
 
-  if (tokenHeader !== process.env.AWS_SESSION_TOKEN) {
+  if (tokenHeader !== sessionToken) {
     logger.error('Token header does not have same value as AWS_SESSION_TOKEN')
     ctx.throw(401, JSON.stringify({ message: 'Supplied auth header has incorrect value', }))
   }
@@ -45,7 +46,7 @@ app
 
 app
   .use(async (ctx: KoaContext, next: KoaNext) => {
-    if(ctx.status === 404){
+    if (ctx.status === 404) {
       ctx.status = 404
       ctx.body = JSON.stringify({
         message: 'No such resource, please review documentation for available resources',

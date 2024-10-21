@@ -1,0 +1,16 @@
+FROM node:20
+
+WORKDIR /app
+
+COPY ./yarn.lock ./
+COPY ./.yarn ./.yarn
+COPY ./.yarnrc.yml ./
+COPY ./package.json ./
+COPY ./lib ./lib
+
+RUN corepack enable
+RUN yarn install --immutable
+
+EXPOSE 2773
+
+CMD [ "yarn", "tsx", "lib/extension/index.ts"]
