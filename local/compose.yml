@@ -16,7 +16,7 @@ services:
       - 2773:2773
     environment:
       AWS_PROFILE: ${AWS_PROFILE}
-      AWS_LAMBDA_RUNTIME_API: "localhost:3000"
+      AWS_LAMBDA_RUNTIME_API: "lambda-environment:3000"
       AWS_SECRETS_EXTENSION_PREFIX: LOCAL_TESTING
       LOCAL_TESTING_LOG_LEVEL: debug
       LOCAL_TESTING_HTTP_PORT: 2773
