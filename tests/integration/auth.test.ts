@@ -12,7 +12,7 @@ describe('Auth', () => {
         'tcp:3000'
       ],
     })
-    await sleep(1000)
+    await sleep(2000)
   })
 
   afterAll(() => {
