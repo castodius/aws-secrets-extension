@@ -1,5 +1,5 @@
 import { variables } from "./env.js"
-import { next, register } from "./extensionsApi.js"
+// import { next, register } from "./extensionsApi.js"
 import { logger } from './logging.js'
 import './server.js'
 import { getSecretValue } from "./sm.js"
@@ -11,10 +11,10 @@ const main = async () => {
     variables,
   })
   logger.debug('Registering extension')
-  const extensionId = await register()
+  /*const extensionId = await register()
   logger.debug({
     extensionId,
-  })
+  })*/
 
   if (variables.PREFETCH_SSM_GET_PARAMETERS.length) {
     logger.info('Prefetching SSM parameters using GetParameters request')
@@ -40,9 +40,9 @@ const main = async () => {
     )
   }
 
-  while (true) {
+  /*while (true) {
     logger.debug('Waiting for next invocation')
     await next(extensionId!)
-  }
+  }*/
 }
 main()
