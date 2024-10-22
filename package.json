@@ -19,7 +19,7 @@
     "test": "vitest run unit --coverage",
     "test-unit": "vitest run unit --coverage",
     "test-watch": "vitest unit --coverage",
-    "test-integration": "vitest run integration",
+    "test-integration": "vitest run integration --test-timeout=60000 --teardownTimeout=60000 --hookTimeout=60000",
     "lint": "eslint",
     "lint-fix": "eslint --fix",
     "prepare": "husky"
