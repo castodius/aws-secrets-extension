@@ -1,26 +1,22 @@
-import { exec, execSync } from 'child_process'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import waitOn from 'wait-on'
+import { startDocker, stopDocker } from './tools'
 
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
 describe('Auth', () => {
   beforeAll(async () => {
-    exec('docker compose --file local/compose.yml up -d')
-    await waitOn({
-      resources: [
-        'tcp:3000'
-      ],
+    await startDocker({
+      projectName: 'auth',
+      lambdaEnvPort: 3000,
+      localExtensionPort: 3001,
     })
-    await sleep(2000)
   })
 
   afterAll(() => {
-    execSync('docker compose --file local/compose.yml down')
+    stopDocker('auth')
   })
 
   it('should handle missing auth header', async () => {
-    const output = await fetch('http://localhost:2773/ssm/parameters/nope')
+    const output = await fetch('http://localhost:3001/ssm/parameters/nope')
 
     expect(output.status).toEqual(401)
     expect(await output.json()).toEqual({
@@ -31,7 +27,7 @@ describe('Auth', () => {
   it('should handle bad auth header', async () => {
     const headers = new Headers()
     headers.append('X-Secrets-Extension-Token', 'nope')
-    const output = await fetch('http://localhost:2773/ssm/parameters/nope', {
+    const output = await fetch('http://localhost:3001/ssm/parameters/nope', {
       headers,
     })
     
@@ -44,7 +40,7 @@ describe('Auth', () => {
   it('should handle non-existing resources', async () => {
     const headers = new Headers()
     headers.append('X-Secrets-Extension-Token', 'local-testing')
-    const output = await fetch('http://localhost:2773/nope', {
+    const output = await fetch('http://localhost:3001/nope', {
       headers,
     })
     
