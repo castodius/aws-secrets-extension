@@ -98,7 +98,10 @@ const cacheIndividualValues = (withDecryption: boolean, region: string, ttl: num
   for (const parameter of result.Parameters!) {
     const arn = parameter.ARN!
     const name = parameter.Name!
-    const item = JSON.stringify(parameter)
+    const item = JSON.stringify({
+      '$metadata': result.$metadata,
+      Parameter: parameter,
+    })
 
     cache.add({
       service: 'ssm',
