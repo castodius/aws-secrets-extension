@@ -1,30 +1,27 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { startDocker, stopDocker } from './tools'
+import { getHelpers } from './tools'
 
 describe('SSM Parameter Store', () => {
+  const { before, after, call, } = getHelpers({
+    projectName: 'ssm',
+    lambdaEnvPort: 3002,
+    localExtensionPort: 3003,
+    ssmGetParameterPreFetch: 'so-secret',
+    ssmGetParametersPreFetch: 'so-secret,my-parameter',
+  })
+  
   beforeAll(async () => {
-    await startDocker({
-      projectName: 'ssm',
-      lambdaEnvPort: 3002,
-      localExtensionPort: 3003,
-      ssmGetParameterPreFetch: 'so-secret',
-      ssmGetParametersPreFetch: 'so-secret,my-parameter',
-    })
+    await before()
   })
 
   afterAll(() => {
-    stopDocker('ssm')
+    after()
   })
 
   describe('Get parameter', () => {
     let cachedAt: string
     it('should return full AWS API response', async () => {
-      const headers = new Headers()
-      headers.append('X-Secrets-Extension-Token', 'local-testing')
-
-      const response = await fetch('http://localhost:3003/ssm/parameters/my-parameter', {
-        headers,
-      })
+      const response = await call('/ssm/parameters/my-parameter')
 
       expect(response.status).toEqual(200)
       const output = await response.json()
@@ -49,12 +46,7 @@ describe('SSM Parameter Store', () => {
     })
 
     it('should return cached value', async () => {
-      const headers = new Headers()
-      headers.append('X-Secrets-Extension-Token', 'local-testing')
-
-      const response = await fetch('http://localhost:3003/ssm/parameters/my-parameter', {
-        headers,
-      })
+      const response = await call('/ssm/parameters/my-parameter')
 
       expect(response.status).toEqual(200)
       const output = await response.json()
@@ -63,12 +55,7 @@ describe('SSM Parameter Store', () => {
     })
 
     it('should handle hierarchies', async () => {
-      const headers = new Headers()
-      headers.append('X-Secrets-Extension-Token', 'local-testing')
-
-      const response = await fetch('http://localhost:3003/ssm/parameters/%2Fa%2Fb', {
-        headers,
-      })
+      const response = await call('/ssm/parameters/%2Fa%2Fb')
 
       expect(response.status).toEqual(200)
       const output = await response.json()
@@ -76,37 +63,22 @@ describe('SSM Parameter Store', () => {
     })
 
     it('should set cache key', async () => {
-      const headers = new Headers()
-      headers.append('X-Secrets-Extension-Token', 'local-testing')
-
-      const response = await fetch('http://localhost:3003/ssm/parameters/my-parameter?cacheKey=foo', {
-        headers,
-      })
+      const response = await call('/ssm/parameters/my-parameter?cacheKey=foo')
 
       expect(response.status).toEqual(200)
       expect(response.headers.get('X-Secrets-Extension-Cache-Key')).toEqual('foo')
     })
 
     it('should disable caching', async () => {
-      const headers = new Headers()
-      headers.append('X-Secrets-Extension-Token', 'local-testing')
-
-      const response = await fetch('http://localhost:3003/ssm/parameters/my-parameter?cacheKey=bar&ttl=0', {
-        headers,
-      })
+      const response = await call('/ssm/parameters/my-parameter?cacheKey=bar&ttl=0')
 
       expect(response.status).toEqual(200)
       expect(response.headers.get('X-Secrets-Extension-Is-Cached')).toEqual('false')
     })
 
     it('should pre-fetch value', async () => {
-      const headers = new Headers()
-      headers.append('X-Secrets-Extension-Token', 'local-testing')
-
       const start = +new Date()
-      const response = await fetch('http://localhost:3003/ssm/parameters/so-secret?withDecryption=true', {
-        headers,
-      })
+      const response = await call('/ssm/parameters/so-secret?withDecryption=true')
       const end = +new Date()
 
       expect(response.status).toEqual(200)
@@ -116,12 +88,7 @@ describe('SSM Parameter Store', () => {
     })
 
     it('should handle SecureString', async () => {
-      const headers = new Headers()
-      headers.append('X-Secrets-Extension-Token', 'local-testing')
-
-      const response = await fetch('http://localhost:3003/ssm/parameters/so-secret?withDecryption=true&cacheKey=another', {
-        headers,
-      })
+      const response = await call('/ssm/parameters/so-secret?withDecryption=true&cacheKey=another')
 
       expect(response.status).toEqual(200)
       const output = await response.json()
@@ -129,12 +96,7 @@ describe('SSM Parameter Store', () => {
     })
 
     it('should fetch from different region', async () => {
-      const headers = new Headers()
-      headers.append('X-Secrets-Extension-Token', 'local-testing')
-
-      const response = await fetch('http://localhost:3003/ssm/parameters/my-param?withDecryption=true&region=us-east-1', {
-        headers,
-      })
+      const response = await call('/ssm/parameters/my-param?withDecryption=true&region=us-east-1')
 
       expect(response.status).toEqual(200)
       const output = await response.json()
@@ -145,12 +107,7 @@ describe('SSM Parameter Store', () => {
   describe('Get parameters by name', () => {
     let cachedAt: string
     it('should return full AWS API response', async () => {
-      const headers = new Headers()
-      headers.append('X-Secrets-Extension-Token', 'local-testing')
-
-      const response = await fetch('http://localhost:3003/ssm/parameters?names=so-secret,%2Fa%2Fb&withDecryption=true', {
-        headers,
-      })
+      const response = await call('/ssm/parameters?names=so-secret,%2Fa%2Fb&withDecryption=true')
 
       expect(response.status).toEqual(200)
       const output = await response.json()
@@ -187,73 +144,43 @@ describe('SSM Parameter Store', () => {
     })
 
     it('should return cached value when using single value query parameter', async () => {
-      const headers = new Headers()
-      headers.append('X-Secrets-Extension-Token', 'local-testing')
-
-      const response = await fetch('http://localhost:3003/ssm/parameters?names=so-secret,%2Fa%2Fb&withDecryption=true', {
-        headers,
-      })
+      const response = await call('/ssm/parameters?names=so-secret,%2Fa%2Fb&withDecryption=true')
 
       expect(response.status).toEqual(200)
       expect(response.headers.get('X-Secrets-Extension-Cached-At')).toEqual(cachedAt)
     })
 
     it('should return cached value when using single value query parameter - other order', async () => {
-      const headers = new Headers()
-      headers.append('X-Secrets-Extension-Token', 'local-testing')
-
-      const response = await fetch('http://localhost:3003/ssm/parameters?names=%2Fa%2Fb,so-secret&withDecryption=true', {
-        headers,
-      })
+      const response = await call('/ssm/parameters?names=%2Fa%2Fb,so-secret&withDecryption=true')
 
       expect(response.status).toEqual(200)
       expect(response.headers.get('X-Secrets-Extension-Cached-At')).toEqual(cachedAt)
     })
 
     it('should return cached value when using multi value query parameter', async () => {
-      const headers = new Headers()
-      headers.append('X-Secrets-Extension-Token', 'local-testing')
-
-      const response = await fetch('http://localhost:3003/ssm/parameters?names=%2Fa%2Fb&names=so-secret&withDecryption=true', {
-        headers,
-      })
+      const response = await call('/ssm/parameters?names=%2Fa%2Fb&names=so-secret&withDecryption=true')
 
       expect(response.status).toEqual(200)
       expect(response.headers.get('X-Secrets-Extension-Cached-At')).toEqual(cachedAt)
     })
 
     it('should set cache key', async () => {
-      const headers = new Headers()
-      headers.append('X-Secrets-Extension-Token', 'local-testing')
-
-      const response = await fetch('http://localhost:3003/ssm/parameters?names=%2Fa%2Fb,so-secret&withDecryption=true&cacheKey=baz', {
-        headers,
-      })
+      const response = await call('/ssm/parameters?names=%2Fa%2Fb,so-secret&withDecryption=true&cacheKey=baz')
 
       expect(response.status).toEqual(200)
       expect(response.headers.get('X-Secrets-Extension-Cache-Key')).toEqual('baz')
     })
 
     it('should disable caching', async () => {
-      const headers = new Headers()
-      headers.append('X-Secrets-Extension-Token', 'local-testing')
-
-      const response = await fetch('http://localhost:3003/ssm/parameters?names=%2Fa%2Fb,so-secret&withDecryption=true&cacheKey=nope&ttl=0', {
-        headers,
-      })
+      const response = await call('/ssm/parameters?names=%2Fa%2Fb,so-secret&withDecryption=true&cacheKey=nope&ttl=0')
 
       expect(response.status).toEqual(200)
       expect(response.headers.get('X-Secrets-Extension-Is-Cached')).toEqual('false')
     })
 
     it('should pre-fetch values', async () => {
-      const headers = new Headers()
-      headers.append('X-Secrets-Extension-Token', 'local-testing')
-
       const start = +new Date()
-      const response = await fetch('http://localhost:3003/ssm/parameters?names=so-secret,my-parameter&withDecryption=true', {
-        headers,
-      })
+      const response = await call('/ssm/parameters?names=so-secret,my-parameter&withDecryption=true')
       const end = +new Date()
 
       expect(response.status).toEqual(200)
@@ -268,12 +195,7 @@ describe('SSM Parameter Store', () => {
     })
 
     it('should fetch from different region', async () => {
-      const headers = new Headers()
-      headers.append('X-Secrets-Extension-Token', 'local-testing')
-  
-      const response = await fetch('http://localhost:3003/ssm/parameters?names=my-param&region=us-east-1&withDecryption=true', {
-        headers,
-      })
+      const response = await call('/ssm/parameters?names=my-param&region=us-east-1&withDecryption=true')
   
       expect(response.status).toEqual(200)
       const output = await response.json()

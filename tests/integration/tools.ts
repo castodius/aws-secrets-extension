@@ -3,7 +3,7 @@ import waitOn from "wait-on"
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
-interface StartDockerParams {
+interface Params {
   readonly projectName: string
   readonly lambdaEnvPort: number
   readonly localExtensionPort: number
@@ -11,7 +11,7 @@ interface StartDockerParams {
   readonly ssmGetParametersPreFetch?: string
 }
 
-export const startDocker = async (params: StartDockerParams) => {
+export const before = (params: Params) => async () => {
   const { projectName, lambdaEnvPort, localExtensionPort, ssmGetParameterPreFetch, ssmGetParametersPreFetch, } = params
 
   const commands = [
@@ -35,6 +35,23 @@ export const startDocker = async (params: StartDockerParams) => {
   await sleep(2000)
 }
 
-export const stopDocker = (projectName: string) => {
+export const after = (projectName: string) => () => {
   execSync(`docker compose --file local/compose.yml --project-name ${projectName} down`)
 }
+
+export const call = (port: number) => async (path: string, headers?: Headers) => {
+  const workingHeaders = new Headers()
+  workingHeaders.append('X-Secrets-Extension-Token', 'local-testing')
+
+  const response = await fetch(`http://localhost:${port}${path}`, {
+    headers: headers ?? workingHeaders,
+  })
+
+  return response
+}
+
+export const getHelpers = (params: Params) => ({
+  before: before(params),
+  after: after(params.projectName),
+  call: call(params.localExtensionPort),
+})
