@@ -47,7 +47,18 @@ export const call = (port: number) => async (path: string, headers?: Headers) =>
     headers: headers ?? workingHeaders,
   })
 
-  return response
+  const output = await response.json()
+  const cachedAt = response.headers.get('X-Secrets-Extension-Cached-At')
+  const cacheKey = response.headers.get('X-Secrets-Extension-Cache-Key')
+  const isCached = response.headers.get('X-Secrets-Extension-Is-Cached')
+
+  return {
+    output,
+    status: response.status,
+    cachedAt,
+    cacheKey,
+    isCached,
+  }
 }
 
 export const getHelpers = (params: Params) => ({

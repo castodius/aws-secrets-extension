@@ -18,10 +18,10 @@ describe('Auth', () => {
   })
 
   it('should handle missing auth header', async () => {
-    const output = await call('/ssm/parameters/nope', new Headers())
+    const { output, status, } = await call('/ssm/parameters/nope', new Headers())
 
-    expect(output.status).toEqual(401)
-    expect(await output.json()).toEqual({
+    expect(status).toEqual(401)
+    expect(output).toEqual({
       message: 'Missing auth header "X-Secrets-Extension-Token"',
     })
   })
@@ -29,19 +29,19 @@ describe('Auth', () => {
   it('should handle bad auth header', async () => {
     const headers = new Headers()
     headers.append('X-Secrets-Extension-Token', 'nope')
-    const output = await call('/ssm/parameters/nope', headers)
+    const { output, status, } = await call('/ssm/parameters/nope', headers)
 
-    expect(output.status).toEqual(401)
-    expect(await output.json()).toEqual({
+    expect(status).toEqual(401)
+    expect(output).toEqual({
       message: 'Supplied auth header has incorrect value',
     })
   })
 
   it('should handle non-existing resources', async () => {
-    const output = await fetch('http://localhost:3001/nope')
+    const { output, status, } = await call('/nope')
 
-    expect(output.status).toEqual(404)
-    expect(await output.json()).toEqual({
+    expect(status).toEqual(404)
+    expect(output).toEqual({
       message: 'No such resource, please review documentation for available resources',
     })
   })

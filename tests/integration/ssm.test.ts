@@ -9,7 +9,7 @@ describe('SSM Parameter Store', () => {
     ssmGetParameterPreFetch: 'so-secret',
     ssmGetParametersPreFetch: 'so-secret,my-parameter',
   })
-  
+
   beforeAll(async () => {
     await before()
   })
@@ -19,12 +19,11 @@ describe('SSM Parameter Store', () => {
   })
 
   describe('Get parameter', () => {
-    let cachedAt: string
+    let previousCachedAt: string
     it('should return full AWS API response', async () => {
-      const response = await call('/ssm/parameters/my-parameter')
+      const { output, status, cachedAt, } = await call('/ssm/parameters/my-parameter')
 
-      expect(response.status).toEqual(200)
-      const output = await response.json()
+      expect(status).toEqual(200)
       expect(output).toEqual({
         '$metadata': {
           attempts: expect.any(Number),
@@ -42,75 +41,69 @@ describe('SSM Parameter Store', () => {
           Version: 2,
         },
       })
-      cachedAt = response.headers.get('X-Secrets-Extension-Cached-At')!
+      previousCachedAt = cachedAt!
     })
 
     it('should return cached value', async () => {
-      const response = await call('/ssm/parameters/my-parameter')
+      const { output, status, cachedAt, } = await call('/ssm/parameters/my-parameter')
 
-      expect(response.status).toEqual(200)
-      const output = await response.json()
+      expect(status).toEqual(200)
       expect(output.Parameter.Value).toEqual('wow, so cool')
-      expect(response.headers.get('X-Secrets-Extension-Cached-At')).toEqual(cachedAt)
+      expect(cachedAt).toEqual(previousCachedAt)
     })
 
     it('should handle hierarchies', async () => {
-      const response = await call('/ssm/parameters/%2Fa%2Fb')
+      const { output, status, } = await call('/ssm/parameters/%2Fa%2Fb')
 
-      expect(response.status).toEqual(200)
-      const output = await response.json()
+      expect(status).toEqual(200)
       expect(output.Parameter.Value).toEqual('cool value!')
     })
 
     it('should set cache key', async () => {
-      const response = await call('/ssm/parameters/my-parameter?cacheKey=foo')
+      const { status, cacheKey, } = await call('/ssm/parameters/my-parameter?cacheKey=foo')
 
-      expect(response.status).toEqual(200)
-      expect(response.headers.get('X-Secrets-Extension-Cache-Key')).toEqual('foo')
+      expect(status).toEqual(200)
+      expect(cacheKey).toEqual('foo')
     })
 
     it('should disable caching', async () => {
-      const response = await call('/ssm/parameters/my-parameter?cacheKey=bar&ttl=0')
+      const { status, isCached, } = await call('/ssm/parameters/my-parameter?cacheKey=bar&ttl=0')
 
-      expect(response.status).toEqual(200)
-      expect(response.headers.get('X-Secrets-Extension-Is-Cached')).toEqual('false')
+      expect(status).toEqual(200)
+      expect(isCached).toEqual('false')
     })
 
     it('should pre-fetch value', async () => {
       const start = +new Date()
-      const response = await call('/ssm/parameters/so-secret?withDecryption=true')
+      const { output, status, } = await call('/ssm/parameters/so-secret?withDecryption=true')
       const end = +new Date()
 
-      expect(response.status).toEqual(200)
-      const output = await response.json()
+      expect(status).toEqual(200)
       expect(output.Parameter.Value).toEqual('wowow')
       expect(end - start).toBeLessThan(20)
     })
 
     it('should handle SecureString', async () => {
-      const response = await call('/ssm/parameters/so-secret?withDecryption=true&cacheKey=another')
+      const { output, status, } = await call('/ssm/parameters/so-secret?withDecryption=true&cacheKey=another')
 
-      expect(response.status).toEqual(200)
-      const output = await response.json()
+      expect(status).toEqual(200)
       expect(output.Parameter.Value).toEqual('wowow')
     })
 
     it('should fetch from different region', async () => {
-      const response = await call('/ssm/parameters/my-param?withDecryption=true&region=us-east-1')
+      const { output, status, } = await call('/ssm/parameters/my-param?withDecryption=true&region=us-east-1')
 
-      expect(response.status).toEqual(200)
-      const output = await response.json()
+      expect(status).toEqual(200)
       expect(output.Parameter.Value).toEqual('USA')
     })
   })
 
   describe('Get parameters by name', () => {
-    let cachedAt: string
+    let previousCachedAt: string
     it('should return full AWS API response', async () => {
-      const response = await call('/ssm/parameters?names=so-secret,%2Fa%2Fb&withDecryption=true')
+      const { output, status, cachedAt, } = await call('/ssm/parameters?names=so-secret,%2Fa%2Fb&withDecryption=true')
 
-      expect(response.status).toEqual(200)
-      const output = await response.json()
+      expect(status).toEqual(200)
       expect(output).toEqual({
         '$metadata': {
           attempts: expect.any(Number),
@@ -140,51 +133,50 @@ describe('SSM Parameter Store', () => {
         ],
         InvalidParameters: [],
       })
-      cachedAt = response.headers.get('X-Secrets-Extension-Cached-At')!
+      previousCachedAt = cachedAt!
     })
 
     it('should return cached value when using single value query parameter', async () => {
-      const response = await call('/ssm/parameters?names=so-secret,%2Fa%2Fb&withDecryption=true')
+      const { status, cachedAt, } = await call('/ssm/parameters?names=so-secret,%2Fa%2Fb&withDecryption=true')
 
-      expect(response.status).toEqual(200)
-      expect(response.headers.get('X-Secrets-Extension-Cached-At')).toEqual(cachedAt)
+      expect(status).toEqual(200)
+      expect(cachedAt).toEqual(previousCachedAt)
     })
 
     it('should return cached value when using single value query parameter - other order', async () => {
-      const response = await call('/ssm/parameters?names=%2Fa%2Fb,so-secret&withDecryption=true')
+      const { status, cachedAt, } = await call('/ssm/parameters?names=%2Fa%2Fb,so-secret&withDecryption=true')
 
-      expect(response.status).toEqual(200)
-      expect(response.headers.get('X-Secrets-Extension-Cached-At')).toEqual(cachedAt)
+      expect(status).toEqual(200)
+      expect(cachedAt).toEqual(previousCachedAt)
     })
 
     it('should return cached value when using multi value query parameter', async () => {
-      const response = await call('/ssm/parameters?names=%2Fa%2Fb&names=so-secret&withDecryption=true')
+      const { status, cachedAt, } = await call('/ssm/parameters?names=%2Fa%2Fb&names=so-secret&withDecryption=true')
 
-      expect(response.status).toEqual(200)
-      expect(response.headers.get('X-Secrets-Extension-Cached-At')).toEqual(cachedAt)
+      expect(status).toEqual(200)
+      expect(cachedAt).toEqual(previousCachedAt)
     })
 
     it('should set cache key', async () => {
-      const response = await call('/ssm/parameters?names=%2Fa%2Fb,so-secret&withDecryption=true&cacheKey=baz')
+      const { status, cacheKey, } = await call('/ssm/parameters?names=%2Fa%2Fb,so-secret&withDecryption=true&cacheKey=baz')
 
-      expect(response.status).toEqual(200)
-      expect(response.headers.get('X-Secrets-Extension-Cache-Key')).toEqual('baz')
+      expect(status).toEqual(200)
+      expect(cacheKey).toEqual('baz')
     })
 
     it('should disable caching', async () => {
-      const response = await call('/ssm/parameters?names=%2Fa%2Fb,so-secret&withDecryption=true&cacheKey=nope&ttl=0')
+      const { status, isCached, } = await call('/ssm/parameters?names=%2Fa%2Fb,so-secret&withDecryption=true&cacheKey=nope&ttl=0')
 
-      expect(response.status).toEqual(200)
-      expect(response.headers.get('X-Secrets-Extension-Is-Cached')).toEqual('false')
+      expect(status).toEqual(200)
+      expect(isCached).toEqual('false')
     })
 
     it('should pre-fetch values', async () => {
       const start = +new Date()
-      const response = await call('/ssm/parameters?names=so-secret,my-parameter&withDecryption=true')
+      const { output, status, } = await call('/ssm/parameters?names=so-secret,my-parameter&withDecryption=true')
       const end = +new Date()
 
-      expect(response.status).toEqual(200)
-      const output = await response.json()
+      expect(status).toEqual(200)
       expect(output.Parameters[0]).toMatchObject({
         Value: 'wow, so cool',
       })
@@ -195,10 +187,9 @@ describe('SSM Parameter Store', () => {
     })
 
     it('should fetch from different region', async () => {
-      const response = await call('/ssm/parameters?names=my-param&region=us-east-1&withDecryption=true')
-  
-      expect(response.status).toEqual(200)
-      const output = await response.json()
+      const { output, status, } = await call('/ssm/parameters?names=my-param&region=us-east-1&withDecryption=true')
+
+      expect(status).toEqual(200)
       expect(output.Parameters[0].Value).toEqual('USA')
     })
   })
