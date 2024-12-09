@@ -1,6 +1,21 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { getHelpers } from './tools'
 
+/**
+ * Parameters used
+ * Get parameter
+ * - eu-west-1 parameter + two versions and label on middle
+ * - eu-west-1, hierarchial parameter
+ * - eu-west-1, SecretString
+ * - eu-west-1, pre-fetch value
+ * - us-east-1, parameter
+ * 
+ * Get parameter
+ * - eu-west-1, 2 parameters
+ * - eu-west-1, pre-fetch values
+ * - us-east-1, 2 parameters
+ */
+
 describe('SSM Parameter Store', () => {
   const { before, after, call, } = getHelpers({
     projectName: 'ssm',
